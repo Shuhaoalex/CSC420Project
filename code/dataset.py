@@ -67,6 +67,7 @@ class Dataset(object):
         if not self.test:
             mask_idx = random.randint(0, len(self.mask_list) - 1)
         else:
+            # in test mode, mask is not random
             mask_idx = self.img_list.index(path)
         
         mask = cv2.imread(self.mask_list[mask_idx])
@@ -96,12 +97,7 @@ class Dataset(object):
     def data_process(self):
         # process original input image
         dataset = tf.data.Dataset.from_tensor_slices(self.img_list).map(lambda x:tf.py_function(self.preprocess_image_mask_edge, inp=[x],Tout=[np.float32, np.uint8, np.float32]))
-        self.dataset = dataset
-
-        # process input image
-        for e in dataset:
-            print(e)
-            exit(0)
+        self.dataset = dataset.batch(self.batch_size)
 
     # crop square image around the center
     def crop_square_image(self, img):
@@ -123,7 +119,7 @@ if __name__ == "__main__":
                         "mask_test_flist":"../datasets/mask_test.flist", \
                             "batch_size":8, "sigma":2, "input_size":256}
 
-    # initialize training dataset
+    # initialize training dataset, training_dataset.dataset is of type tf.data.Dataset
     training_dataset = Dataset(config, config["img_train_flist"], config["mask_train_flist"], training=True, validation=False, test=False)
 
     # initialize validation dataset
