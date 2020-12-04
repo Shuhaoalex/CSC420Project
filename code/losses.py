@@ -88,7 +88,7 @@ class InpaintingDescriminator(keras.Model):
 
 class PerceptuaAndStylelLoss(keras.Model):
     def __init__(self, **kwargs):
-        super(PerceptuaAndStylelLoss, self).__init__(**kwargs)
+        super(PerceptuaAndStylelLoss, self).__init__(trainable=False, **kwargs)
         vgg = keras.applications.VGG19(include_top=True, weights='imagenet')
         perceptual_out = list(map(lambda lname: vgg.get_layer(lname).output, ["block1_conv1", "block2_conv1", "block3_conv1", "block4_conv1", "block5_conv1"]))
         style_out = list(map(lambda lname: vgg.get_layer(lname).output, ["block2_conv2", "block3_conv4", "block4_conv4", "block5_conv2"]))
