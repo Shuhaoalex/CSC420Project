@@ -5,8 +5,11 @@ from tensorflow.keras import layers
 import cv2 as cv
 
 class EdgeDiscriminator(keras.Model):
-    def __init__(self, img_shape):
-        super(EdgeDiscriminator, self).__init__()
+    def __init__(self, **kwargs):
+        super(EdgeDiscriminator, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        img_shape = input_shape[1:]
         input_x = layers.Input(img_shape)
         input_y = layers.Input(img_shape)
         curr_x = input_x
@@ -50,8 +53,11 @@ class EdgeDiscriminator(keras.Model):
 
 
 class InpaintingDescriminator(keras.Model):
-    def __init__(self, img_shape):
-        super(InpaintingDescriminator, self).__init__()
+    def __init__(self, **kwargs):
+        super(InpaintingDescriminator, self).__init__(**kwargs)
+    
+    def build(self, input_shape):
+        img_shape = input_shape[1:]
         self.model = keras.Sequential((
             layers.Input(img_shape),
             layers.Conv2D(filters=64, kernel_size=[4,4], strides=[2,2], padding="same", use_bias=True, name="conv0"),
@@ -85,8 +91,8 @@ class InpaintingDescriminator(keras.Model):
 
 
 class PerceptuaAndStylelLoss(keras.Model):
-    def __init__(self):
-        super(PerceptuaAndStylelLoss, self).__init__()
+    def __init__(self, **kwargs):
+        super(PerceptuaAndStylelLoss, self).__init__(**kwargs)
         vgg = keras.applications.VGG19(include_top=True, weights='imagenet')
         perceptual_out = list(map(lambda lname: vgg.get_layer(lname).output, ["block1_conv1", "block2_conv1", "block3_conv1", "block4_conv1", "block5_conv1"]))
         style_out = list(map(lambda lname: vgg.get_layer(lname).output, ["block2_conv2", "block3_conv4", "block4_conv4", "block5_conv2"]))
@@ -114,9 +120,6 @@ class PerceptuaAndStylelLoss(keras.Model):
             SL += tf.reduce_mean(tf.abs(cova - covb))
         SL /= 4
         return PL, SL
-    
-
-
 
 # a = EdgeLoss([224, 224, 3], [[64, 64], [128, 128]], [[0, 1], [0, 1], [0, 0, 1]], [1024, 1024, 1])
 # img = cv.resize(cv.imread("Ladv.png"), (224, 224))[None, :, :, :].astype(np.float32)
