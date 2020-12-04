@@ -7,18 +7,13 @@ class GatedConv2d(layers.Layer):
     def __init__(self, filter_number, ksize=(3,3), strides=(1,1), dialation_rate=(1,1), **kwargs):
         super(GatedConv2d, self).__init__(**kwargs)
         self.conv = layers.Conv2D(filter_number, ksize, strides, padding="same", use_bias=True, activation=None)
-        
-    def build(self, input_shape):
-        input_layer = layers.Input(input_shape[1:])
-        convolved = self.conv(input_layer)
+
+    def call(self, prev):
+        convolved = self.conv(prev)
         gating, feature = tf.split(convolved, 2, 3)
         activate_feature = tf.nn.elu(feature)
         smooth_gating = tf.nn.sigmoid(gating)
-        result = activate_feature * smooth_gating
-        self.gconv = keras.Model(inputs=input_layer, outputs=result, name="gated_conv")
-
-    def call(self, prev):
-        return self.gconv(prev)
+        return activate_feature * smooth_gating
 
 
 class GatedDeconv2d(layers.Layer):
@@ -26,14 +21,10 @@ class GatedDeconv2d(layers.Layer):
         super(GatedDeconv2d, self).__init__(**kwargs)
         self.conv = GatedConv2d(filter_number, ksize, strides)
     
-    def build(self, input_shape):
-        input_layer = layers.Input(input_shape[1:])
-        resized_input = tf.image.resize(input_layer, (input_shape[1] * 2, input_shape[2] * 2), method='nearest')
-        result = self.conv(resized_input)
-        self.gconv = keras.Model(inputs=input_layer, outputs=result, name="gated_conv")
-    
     def call(self, prev):
-        return self.gconv(prev)
+        input_shape = tf.shape(prev)
+        resized_input = tf.image.resize(prev, (input_shape[1] * 2, input_shape[2] * 2), method='nearest')
+        return self.conv(resized_input)
 
 
 class GatedConvGenerator(keras.Model):
@@ -73,12 +64,8 @@ class GatedConvGenerator(keras.Model):
                     )
                 )
     
-    def build(self, input_shape):
-        input_layer = layers.Input(input_shape[1:])
-        self.model = keras.Sequential((input_layer, self.convs))
-    
     def call(self, inp):
-        return self.model(inp)
+        return self.convs(inp)
 
 
 class EdgeGenerator(keras.Model):
@@ -104,10 +91,6 @@ class EdgeGenerator(keras.Model):
             ]
         
         self.model = GatedConvGenerator(config, name="convolutions")
-    
-    def build(self, input_shape):
-        input_layer = layers.Input(input_shape[1:])
-        self.model = keras.Sequential((input_layer, self.convs))
     
     def call(self, inp):
         return self.model(inp)
@@ -136,10 +119,6 @@ class InpaitingGenerator(keras.Model):
             ]
         
         self.model = GatedConvGenerator(config, name="convolutions")
-    
-    def build(self, input_shape):
-        input_layer = layers.Input(input_shape[1:])
-        self.model = keras.Sequential((input_layer, self.convs))
     
     def call(self, inp):
         return self.model(inp)

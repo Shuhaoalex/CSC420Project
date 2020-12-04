@@ -31,7 +31,7 @@ class EdgeDiscriminator(keras.Model):
         self.LFM = keras.Model(inputs=(input_x, input_y), outputs=FMLoss, name="Lfm")
         self.pred_logit = keras.Model(inputs=input_x, outputs=result_x, name='pred_logit')
     
-    def predict(self, img):
+    def call(self, img):
         return tf.nn.sigmoid(self.pred_logit(img))
     
     def feature_matching_loss(self, imga, imgb):
@@ -55,11 +55,7 @@ class EdgeDiscriminator(keras.Model):
 class InpaintingDescriminator(keras.Model):
     def __init__(self, **kwargs):
         super(InpaintingDescriminator, self).__init__(**kwargs)
-    
-    def build(self, input_shape):
-        img_shape = input_shape[1:]
         self.model = keras.Sequential((
-            layers.Input(img_shape),
             layers.Conv2D(filters=64, kernel_size=[4,4], strides=[2,2], padding="same", use_bias=True, name="conv0"),
             layers.LeakyReLU(0.2),
             layers.Conv2D(filters=128, kernel_size=[4,4], strides=[2,2], padding="same", use_bias=True, name="conv1"),
