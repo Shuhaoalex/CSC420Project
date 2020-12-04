@@ -105,11 +105,11 @@ class Dataset(object):
 
             mask_edge_map = cv2.bitwise_or(edge_map, mask)
 
-        # mask_color_image_bg = cv2.bitwise_and(color_image, color_image, mask=inv_mask)
-        # mask_color_image = cv2.bitwise_or(mask_color_image_bg, np.stack([mask,mask,mask], axis=2))
-        # cv2.imwrite("/Users/serenawang/csc420/project/datasets/hi.png", cv2.cvtColor(mask_color_image, cv2.COLOR_RGB2BGR))
-
         # convert all outputs to 3d
+        # TODO: 
+        # 1. convert all final outputs to type float32
+        # 2. range of color image, gray_image : 0 to 255 --> -1 to 1
+        # 3. value of mask, edge_map : 0 and 1 
         gray_image = tf.expand_dims(gray_image, axis=2)
         mask = tf.expand_dims(mask, axis=2)
         edge_map = tf.expand_dims(edge_map, axis=2)
@@ -132,3 +132,25 @@ class Dataset(object):
         crop_img = img[top_idx:top_idx+side, left_idx:left_idx+side]
 
         return crop_img
+
+if __name__ == "__main__":
+    # TODO: should initialize all variables to a config file
+    config = {"img_train_flist":"../datasets/celeba_train.flist", \
+        "img_test_flist":"../datasets/celeba_test.flist", \
+            "img_validation_flist":"../datasets/celeba_validation.flist", \
+                "mask_train_flist":"../datasets/mask_train.flist", \
+                    "mask_validation_flist":"../datasets/mask_validation.flist", \
+                        "mask_test_flist":"../datasets/mask_test_test.flist", \
+                            "batch_size":2, "sigma":2, "input_size":256}
+
+    # # initialize training dataset
+    training_dataset = Dataset(config, config["img_train_flist"], config["mask_train_flist"], training=True, validation=False, test=False)
+
+    # for color_image, gray_image, mask, edge_map, mask_gray_image, mask_edge_map in training_dataset.dataset:
+    #     print(gray_image.shape) # 2 * 256 * 256 * 1
+
+    # # initialize validation dataset
+    # validation_dataset = Dataset(config, config["img_validation_flist"], config["mask_train_flist"], training=False, validation=True, test=False)
+
+    # initialize test dataset
+    # test_dataset = Dataset(config, config["img_test_flist"], config["mask_test_flist"], training=False, validation=False, test=True)
