@@ -37,10 +37,17 @@ class EdgeDiscriminator(keras.Model):
     def feature_matching_loss(self, imga, imgb):
         return self.LFM(imga, imgb)
     
-    def generator_loss(self, img):
-        tmp = self.pred_logit(img)
-        return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones(tf.shape(tmp)), logits=tmp))
-    
+    def generator_loss(self, fake_img, true_img):
+        fake_logit = self.pred_logit(fake_img)
+        true_logit = self.pred_logit(true_img)
+        gen_loss = tf.reduce_mean(
+                           tf.nn.sigmoid_cross_entropy_with_logits(
+                           tf.zeros(tf.shape(true_logit)), true_logit)) +\
+                   tf.reduce_mean(
+                           tf.nn.sigmoid_cross_entropy_with_logits(
+                           tf.ones(tf.shape(fake_logit)), fake_logit))
+        return gen_loss, self.LFM(fake_img, true_img)
+
     def discriminator_loss(self, fake_img, true_img):
         fake_logit = self.pred_logit(fake_img)
         true_logit = self.pred_logit(true_img)
@@ -52,9 +59,9 @@ class EdgeDiscriminator(keras.Model):
                         tf.zeros(tf.shape(fake_logit)), fake_logit))
 
 
-class InpaintingDescriminator(keras.Model):
+class InpaintingDiscriminator(keras.Model):
     def __init__(self, **kwargs):
-        super(InpaintingDescriminator, self).__init__(**kwargs)
+        super(InpaintingDiscriminator, self).__init__(**kwargs)
         self.model = keras.Sequential((
             layers.Conv2D(filters=64, kernel_size=[4,4], strides=[2,2], padding="same", use_bias=True, name="conv0"),
             layers.LeakyReLU(0.2),
@@ -71,10 +78,17 @@ class InpaintingDescriminator(keras.Model):
     def call(self, img):
         return tf.nn.sigmoid(self.model(img))
     
-    def generator_loss(self, img):
-        tmp = self.model(img)
-        return tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=tf.ones(tf.shape(tmp)), logits=tmp))
-    
+    def generator_loss(self, fake_img, true_img):
+        fake_logit = self.model(fake_img)
+        true_logit = self.model(true_img)
+        gen_loss = tf.reduce_mean(
+                           tf.nn.sigmoid_cross_entropy_with_logits(
+                           tf.zeros(tf.shape(true_logit)), true_logit)) +\
+                   tf.reduce_mean(
+                           tf.nn.sigmoid_cross_entropy_with_logits(
+                           tf.ones(tf.shape(fake_logit)), fake_logit))
+        return gen_loss
+
     def discriminator_loss(self, fake_img, true_img):
         fake_logit = self.model(fake_img)
         true_logit = self.model(true_img)
@@ -100,9 +114,12 @@ class PerceptuaAndStylelLoss(keras.Model):
         x_T = tf.transpose(x, perm=(0,2,1))
         return tf.matmul(x_T, x) / (shape[1] * shape[2] * shape[3])
 
-    def call(self, a, b):
-        a_pf, a_sf = self.vgg_hijack(a)
-        b_pf, b_sf = self.vgg_hijack(b)
+    def call(self, fake_img, real_img):
+        means = -tf.constant([103.939, 116.779, 123.68])
+        pre_processed_fake = tf.nn.bias_add((fake_img + 1) * 127.5, means)
+        pre_processed_real = tf.nn.bias_add((real_img + 1) * 127.5, means)
+        a_pf, a_sf = self.vgg_hijack(pre_processed_fake)
+        b_pf, b_sf = self.vgg_hijack(pre_processed_real)
 
         PL = 0
         for af, bf in zip(a_pf, b_pf):
@@ -117,9 +134,16 @@ class PerceptuaAndStylelLoss(keras.Model):
         SL /= 4
         return PL, SL
 
-# a = EdgeLoss([224, 224, 3], [[64, 64], [128, 128]], [[0, 1], [0, 1], [0, 0, 1]], [1024, 1024, 1])
-# img = cv.resize(cv.imread("Ladv.png"), (224, 224))[None, :, :, :].astype(np.float32)
-# result = a(img, img, 1, 10)
-# print(result)
-# keras.utils.plot_model(a.LFM, "LFM.png")
-# keras.utils.plot_model(a.Ladv, "Ladv.png")
+
+def reconstruction_loss(fake_img, true_img):
+    return tf.reduce_mean(tf.abs(fake_img - true_img))
+
+if __name__ == "__main__":
+    a = EdgeDiscriminator()
+    print(a)
+    # a = EdgeLoss([224, 224, 3], [[64, 64], [128, 128]], [[0, 1], [0, 1], [0, 0, 1]], [1024, 1024, 1])
+    # img = cv.resize(cv.imread("Ladv.png"), (224, 224))[None, :, :, :].astype(np.float32)
+    # result = a(img, img, 1, 10)
+    # print(result)
+    # keras.utils.plot_model(a.LFM, "LFM.png")
+    # keras.utils.plot_model(a.Ladv, "Ladv.png")
