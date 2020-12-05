@@ -127,9 +127,10 @@ class EdgeGenerator(keras.Model):
         
         self.model = GatedConvGenerator(config, name="convolutions")
     
-    def call(self, inp):
-        logits = self.model(inp)
-        return tf.sigmoid(logits)
+    def call(self, masked_gray, masked_edge, mask):
+        inp = tf.concat((masked_gray, masked_edge, mask), axis=3)
+        raw_pred = tf.sigmoid(self.model(inp))
+        return raw_pred * (1-mask) + masked_edge
 
 
 class InpaitingGenerator(keras.Model):
@@ -156,6 +157,7 @@ class InpaitingGenerator(keras.Model):
         
         self.model = GatedConvGenerator(config, name="convolutions")
     
-    def call(self, inp):
-        logits = self.model(inp)
-        return tf.tanh(logits)
+    def call(self, edge, masked_clr, mask):
+        inp = tf.concat((edge, masked_clr, mask), axis=3)
+        raw_pred = tf.tanh(self.model(inp))
+        return raw_pred * (1-mask) + masked_clr
