@@ -23,7 +23,6 @@ class Dataset(object):
         
         # read parameter values from the config file
         self.input_size = config["input_size"]
-        self.batch_size = config["batch_size"]
         self.sigma = config["sigma"]
 
         # process the data we use
@@ -120,8 +119,7 @@ class Dataset(object):
 
     def data_process(self):
         # process original input image
-        dataset = tf.data.Dataset.from_tensor_slices(self.img_list).map(lambda x:tf.py_function(self.preprocess_image_mask_edge, inp=[x],Tout=[np.uint8,np.uint8, np.uint8, np.uint8, np.uint8, np.uint8]))
-        self.dataset = dataset.batch(self.batch_size)
+        self.dataset = tf.data.Dataset.from_tensor_slices(self.img_list).map(lambda x:tf.py_function(self.preprocess_image_mask_edge, inp=[x],Tout=[np.uint8,np.uint8, np.uint8, np.uint8, np.uint8, np.uint8]))
 
     # crop square image around the center
     def crop_square_image(self, img):

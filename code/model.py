@@ -4,8 +4,6 @@ from losses import *
 import os
 
 class InpaitingModel:
-    
-
     def __init__(self, model_config):
         self.config = model_config
         self.edge_generator = EdgeGenerator(config=model_config["edge"]["generator"], name="EdgeGenerator")
