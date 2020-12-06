@@ -40,7 +40,7 @@
                 {"mode":"conv", "chnl": 3, "name":"conv14"}
             ]
         },
-        "model_ckpoint_dir": "job1/weights/",
+        "model_ckpoint_dir": "weights/",
         "use_pretrained_weights": false
     },
     "dataset_config":{
