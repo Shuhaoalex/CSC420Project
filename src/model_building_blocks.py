@@ -7,7 +7,7 @@ class GatedConv2d(layers.Layer):
     def __init__(self, filter_number, ksize=(3,3), strides=(1,1), dilation_rate=(1,1), **kwargs):
         super(GatedConv2d, self).__init__(**kwargs)
         self.conv = layers.Conv2D(
-            filter_number,
+            filter_number * 2,
             kernel_size=ksize,
             strides=strides,
             padding="same",
@@ -27,7 +27,7 @@ class GatedDeconv2d(layers.Layer):
     def __init__(self, filter_number, ksize=(3,3), strides=(2,2), dilation_rate=(1,1), **kwargs):
         super(GatedDeconv2d, self).__init__(**kwargs)
         self.conv = layers.Conv2DTranspose(
-            filter_number,
+            filter_number * 2,
             kernel_size=ksize,
             strides=strides,
             padding="same",
@@ -58,8 +58,8 @@ class GatedConvGenerator(keras.Model):
         """
         super(GatedConvGenerator, self).__init__(**kwargs)
         self.convs = keras.Sequential()
-        for i, c in enumerate(config[:-1]):
-            if c["mode"] == "conv":
+        for i, c in enumerate(config):
+            if c["mode"] == "gconv":
                 self.convs.add(
                     GatedConv2d(
                         c["chnl"],
@@ -69,7 +69,7 @@ class GatedConvGenerator(keras.Model):
                         name=c.get("name", "conv{}".format(i))
                     )
                 )
-            else:
+            elif c["mode"] == "gdeconv":
                 self.convs.add(
                     GatedDeconv2d(
                         c["chnl"],
@@ -79,27 +79,26 @@ class GatedConvGenerator(keras.Model):
                         name=c.get("name", "conv{}".format(i))
                     )
                 )
-        c = config[-1]
-        if c["mode"] == "conv":
-            self.convs.add(layers.Conv2D(
-                c["chnl"],
-                kernel_size=c.get("ksize", (3,3)),
-                strides=c.get("stride", (1,1)),
-                padding="same",
-                dilation_rate=c.get("d_factor", (1,1)),
-                use_bias=True,
-                activation=None,
-                name=c.get("name", "conv{}".format(i))))
-        else:
-            self.convs.add(layers.Conv2DTranspose(
-                c["chnl"],
-                kernel_size=c.get("ksize", (3,3)),
-                strides=c.get("stride", (2,2)),
-                padding="same",
-                dilation_rate=c.get("d_factor", (1,1)),
-                use_bias=True,
-                activation=None,
-                name=c.get("name", "conv{}".format(i))))
+            elif c["mode"] == "conv":
+                self.convs.add(layers.Conv2D(
+                    c["chnl"],
+                    kernel_size=c.get("ksize", (3,3)),
+                    strides=c.get("stride", (1,1)),
+                    padding="same",
+                    dilation_rate=c.get("d_factor", (1,1)),
+                    use_bias=True,
+                    activation=None,
+                    name=c.get("name", "conv{}".format(i))))
+            else:
+                self.convs.add(layers.Conv2DTranspose(
+                    c["chnl"],
+                    kernel_size=c.get("ksize", (3,3)),
+                    strides=c.get("stride", (2,2)),
+                    padding="same",
+                    dilation_rate=c.get("d_factor", (1,1)),
+                    use_bias=True,
+                    activation=None,
+                    name=c.get("name", "conv{}".format(i))))
         
     def call(self, inp):
         return self.convs(inp)
