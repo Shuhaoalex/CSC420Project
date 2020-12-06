@@ -1,0 +1,55 @@
+Under ./datasets/.. folder
+folder structure could be like:
+--datasets
+------Places2 
+----------train
+-------------.....
+----------test
+-------------.....
+----------validation
+-------------.....
+------celeba
+----------train
+-------------.....
+----------test
+-------------.....
+----------validation
+-------------.....
+------qd_imd
+----------train
+-------------.....
+----------test
+-------------.....
+----------validation
+-------------.....
+
+
+1. Images
+1.1 Use Places365-Standard, 
+    Reference link: http://places2.csail.mit.edu
+    Download link: http://places2.csail.mit.edu/download.html
+
+    Under "Data of Places365-Standard", under "Small images (256 * 256)", 
+    download train images, validation images and test images, where each one will be a separate folder.
+
+1.2 Use celeba,
+    Reference link: http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html
+    Download link: https://drive.google.com/drive/folders/0B7EVK8r0v71pTUZsaXdaSnZBZzg
+
+    Use cropped and align version, so donwload "img_align_celeba.zip" and unzip it. After unzipping, it will be a single folder. 
+    Move [0.jpg,...162770.jpg] under /celeba/train/, [162771.jpg ... 182637.jpg] under /celeba/validation/ and [182638.jpg ... 202599.jpg] under /celeba/test/
+
+2. Irregular Masks
+    Use qd-imd,
+    Reference link: https://github.com/karfly/qd-imd
+    Download link: https://www.dropbox.com/s/ui4zgw7dhe9v1ju/qd_imd.tar.gz?dl=0 
+
+    Download from the above download link and unzip it. After unzipping, it will be two folders(train and test).
+    Move images under /train and /test to /qd_imd/train/ and /qd_imd/test/ separately
+    Move [40000_train.png ... 49999_train.png] from /qd_imd/train/ to /qd_imd/validation/. Other images under /qd_imd/train/ and /qd_imd/test/ stay remained.
+
+
+2. Generate flist
+Choose one image dataset and use irregular mask dataset to initialize dataset.
+You'll need a flist file which lists all file paths. Run script under /script/ to generate that flist file.
+Example use: python ./src/scripts/flist.py --path ./datasets/celeba/train/ --output ./datasets/celeba_train.flist
