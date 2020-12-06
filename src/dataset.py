@@ -9,25 +9,31 @@ from skimage.feature import canny
 from PIL import Image
 
 class Dataset(object):
-    def __init__(self, config, img_list, mask_list, training=False, validation=False, test=False):
+    def __init__(self, config, img_list, mask_list, mode):
         super(Dataset, self).__init__()
 
         # image list and mask list
         self.img_list = self.load_flist(img_list)
         self.mask_list = self.load_flist(mask_list)
 
-        # type of dataset
-        self.training = training
-        self.validation = validation
-        self.test = test
+        # type of dataset: either train, test, or validation
+        self.mode = mode
         
         # read parameter values from the config file
         self.input_size = config["input_size"]
         self.sigma = config["sigma"]
 
         # process the data we use
-        self.data_process()
+        self.edge_dataset = None
+        self.color_dataset = None
+        self.generate_edge_dataset()
+        self.generate_color_dataset()
 
+    def get_edge_dataset(self):
+        return self.edge_dataset
+
+    def get_color_dataset(self):
+        return self.color_dataset
 
     # TODO: Add reference
     def load_flist(self, flist):
@@ -45,8 +51,8 @@ class Dataset(object):
                 except:
                     return [flist]
         return []
-
-    def preprocess_image_mask_edge(self,path):
+    
+    def preprocess_img_mask_edge_data(self, path, mode=None):
         size = self.input_size
         path = path.numpy().decode("utf-8")
         image = cv2.imread(path)
@@ -56,70 +62,69 @@ class Dataset(object):
         # 1. ground truth part
         # 1.1 ground truth color image
         # for training and validation data, first check to crop the original color image
-        if not self.test:
+        if self.mode != "test":
             if r != c:
                 color_image = self.crop_square_image(color_image)
         # resize image to the size specified in config file
         color_image = cv2.resize(color_image, (size,size))
+        gray_image = cv2.cvtColor(color_image, cv2.COLOR_RGB2GRAY)
+        color_image = color_image.astype(np.float32)
 
-        # 1.2 input mask is 0 for missing region and 255 for background
+        # 1.2 input mask is 0(black) for missing foreground region and 255(white) for background
         # random select a mask for training
-        if not self.test:
+        if self.mode != "test":
             mask_idx = random.randint(0, len(self.mask_list) - 1)
         else:
             mask_idx = np.where(self.img_list == path)[0][0]
 
         mask = cv2.imread(self.mask_list[mask_idx])
         mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
-        if not self.test:
+        if self.mode != "test":
             if mask.shape[0] != mask.shape[1]:
                 mask = self.crop_square_image(mask)
         mask = cv2.resize(mask, (size, size))
-        inv_mask = (mask > 0).astype(np.uint8) * 255 # make sure values are either 255 or 0 after resizing with interpolation # 255 for background, 0 for missing region
-        mask = cv2.bitwise_not(inv_mask) # 0 for background, 255 for missing foreground region
-
+        # make sure values are either 255 or 0 after resizing with interpolation 
+        bool_mask = mask > 0
+        # final output for mask: 0(black) for missing foreground region and 1(white) for background
+        mask = bool_mask.astype(np.float32)
+        
         # 1.3 ground truth edge without any masked regions
         sigma = self.sigma
-        gray_image = cv2.cvtColor(color_image, cv2.COLOR_RGB2GRAY)
         gray_blur_image = cv2.GaussianBlur(gray_image, (5, 5), sigma)
-        if self.training or self.validation:
-            edge_mask = None # set None to find ground truth edge map
-        else:
-            # in test mode images are masked (with masked regions),
-            # using 'mask' parameter prevents canny to detect edges for the masked regions
-            edge_mask = (1 - mask / 255).astype(np.bool)
-
+        gray_image = gray_image.astype(np.float32)
+        # in test mode images are masked (with masked regions),
+        # using 'mask' parameter prevents canny to detect edges for the masked regions
+        edge_mask = None if self.mode != "test" else bool_mask
         # canny
-        inv_edge_map = canny(gray_blur_image, sigma=sigma, mask=edge_mask).astype(np.uint8) * 255 # background is 0, foreground is 255
-        edge_map = cv2.bitwise_not(inv_edge_map)
-
-        # TODO: check if all below inputs are needed
-        # 2. inputs for network(masked grayscale image and masked edge map)
-        if self.test:
-            mask_gray_image = gray_image
-            mask_edge_map = edge_map
-        else:
-            mask_gray_image_bg = cv2.bitwise_and(gray_image, gray_image, mask=inv_mask)
-            mask_gray_image = cv2.bitwise_or(mask_gray_image_bg, mask)
-
-            mask_edge_map = cv2.bitwise_or(edge_map, mask)
-
-        # convert all outputs to 3d
-        # TODO: 
-        # 1. convert all final outputs to type float32
-        # 2. range of color image, gray_image : 0 to 255 --> -1 to 1
-        # 3. value of mask, edge_map : 0 and 1 
+        edge_map = canny(gray_blur_image, sigma=sigma, mask=edge_mask).astype(np.float32) # background is 0, foreground is 1
+        
+        # finalize output
+        # normalize gray and color image from [0,255] to [-1,1]
+        color_image = 2*(color_image - np.amin(color_image)) / (np.amax(color_image) - np.amin(color_image)) - 1
+        gray_image =  2*(gray_image - np.amin(gray_image)) / (np.amax(gray_image) - np.amin(gray_image)) - 1
+        # expand dimension to 3 channels
         gray_image = tf.expand_dims(gray_image, axis=2)
-        mask = tf.expand_dims(mask, axis=2)
-        edge_map = tf.expand_dims(edge_map, axis=2)
-        mask_gray_image = tf.expand_dims(mask_gray_image, axis=2)
-        mask_edge_map = tf.expand_dims(mask_edge_map, axis=2)
+        mask = tf.expand_dims(mask, axis=2) # background is 1, foreground mask region is 0
+        edge_map = tf.expand_dims(edge_map, axis=2) # background is 0, foreground is 1
 
-        return color_image, gray_image, mask, edge_map, mask_gray_image, mask_edge_map
+        if mode == "edge":
+            # TODO: check multiply first or normalize first
+            masked_gray = mask * gray_image
+            return masked_gray, edge_map, mask
+        else:
+            return edge_map, color_image, mask
 
-    def data_process(self):
-        # process original input image
-        self.dataset = tf.data.Dataset.from_tensor_slices(self.img_list).map(lambda x:tf.py_function(self.preprocess_image_mask_edge, inp=[x],Tout=[np.uint8,np.uint8, np.uint8, np.uint8, np.uint8, np.uint8]))
+    def preprocess_edge_dataset(self, path):
+        return self.preprocess_img_mask_edge_data(path, mode="edge")
+
+    def preprocess_color_dataset(self, path):
+        return self.preprocess_img_mask_edge_data(path, mode="color")
+
+    def generate_edge_dataset(self):
+        self.edge_dataset = tf.data.Dataset.from_tensor_slices(self.img_list).map(lambda x:tf.py_function(self.preprocess_edge_dataset, inp=[x],Tout=[np.float32, np.float32, np.float32]))
+
+    def generate_color_dataset(self):
+        self.color_dataset = tf.data.Dataset.from_tensor_slices(self.img_list).map(lambda x:tf.py_function(self.preprocess_color_dataset, inp=[x],Tout=[np.float32, np.float32, np.float32]))
 
     # crop square image around the center
     def crop_square_image(self, img):
@@ -131,6 +136,24 @@ class Dataset(object):
 
         return crop_img
 
+def get_dataset(config, mode=None):
+    img_list, mask_list = None,None
+    if mode == "train":
+        img_list = config["img_train_flist"]
+        mask_list = config["mask_train_flist"]
+    elif mode == "validation":
+        img_list = config["img_validation_flist"]
+        mask_list = config["mask_validation_flist"]
+    elif mode == "test":
+        img_list = config["img_test_flist"]
+        mask_list = config["mask_test_flist"]
+
+    if img_list and mask_list:
+        dataset = Dataset(config, img_list, mask_list, mode)
+        edge_dataset = dataset.get_edge_dataset()
+        color_dataset = dataset.get_color_dataset()
+        return edge_dataset, color_dataset
+
 if __name__ == "__main__":
     # TODO: should initialize all variables to a config file
     config = {"img_train_flist":"../datasets/celeba_train.flist", \
@@ -139,16 +162,8 @@ if __name__ == "__main__":
                 "mask_train_flist":"../datasets/mask_train.flist", \
                     "mask_validation_flist":"../datasets/mask_validation.flist", \
                         "mask_test_flist":"../datasets/mask_test_test.flist", \
-                            "batch_size":2, "sigma":2, "input_size":256}
-
-    # # initialize training dataset
-    training_dataset = Dataset(config, config["img_train_flist"], config["mask_train_flist"], training=True, validation=False, test=False)
-
-    # for color_image, gray_image, mask, edge_map, mask_gray_image, mask_edge_map in training_dataset.dataset:
-    #     print(gray_image.shape) # 2 * 256 * 256 * 1
-
-    # # initialize validation dataset
-    # validation_dataset = Dataset(config, config["img_validation_flist"], config["mask_train_flist"], training=False, validation=True, test=False)
-
-    # initialize test dataset
-    # test_dataset = Dataset(config, config["img_test_flist"], config["mask_test_flist"], training=False, validation=False, test=True)
+                            "sigma":2, "input_size":256}
+    
+    # get neural network datasets
+    # inputs: config file, dataset mode(train, test, validation)
+    # edge_dataset,color_dataset = get_dataset(config, mode="train")
