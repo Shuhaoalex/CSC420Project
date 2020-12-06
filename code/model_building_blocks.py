@@ -94,7 +94,7 @@ class GatedConvGenerator(keras.Model):
             self.convs.add(layers.Conv2DTranspose(
                 c["chnl"],
                 kernel_size=c.get("ksize", (3,3)),
-                strides=c.get("stride", (1,1)),
+                strides=c.get("stride", (2,2)),
                 padding="same",
                 dilation_rate=c.get("d_factor", (1,1)),
                 use_bias=True,
