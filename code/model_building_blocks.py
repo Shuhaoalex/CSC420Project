@@ -106,25 +106,8 @@ class GatedConvGenerator(keras.Model):
 
 
 class EdgeGenerator(keras.Model):
-    def __init__(self, config=None, **kwargs):
-        super(EdgeGenerator, self).__init__(**kwargs)
-        if config is None:
-            cnum = 16
-            config = [
-                {"mode":"conv", "chnl": cnum, "ksize":(5,5), "name":"conv1"},
-                {"mode":"conv", "chnl": 2*cnum, "stride":(2,2), "name":"conv2_downsample"},
-                {"mode":"conv", "chnl": 2*cnum, "name":"conv3"},
-                {"mode":"conv", "chnl": 4*cnum, "stride":(2,2), "name":"conv4_downsample"},
-                {"mode":"conv", "chnl": 4*cnum, "name":"conv5"},
-                {"mode":"conv", "chnl": 4*cnum, "d_factor":(2,2), "name":"conv6_astrous"},
-                {"mode":"conv", "chnl": 4*cnum, "d_factor":(4,4), "name":"conv7_astrous"},
-                {"mode":"conv", "chnl": 4*cnum, "name":"conv10"},
-                {"mode":"deconv", "chnl": 2*cnum, "name":"conv11_upsample"},
-                {"mode":"conv", "chnl": 2*cnum, "name":"conv12"},
-                {"mode":"deconv", "chnl": cnum, "name":"conv13_upsample"},
-                {"mode":"conv", "chnl": 1, "name":"conv14"},
-            ]
-        
+    def __init__(self, config, **kwargs):
+        super(EdgeGenerator, self).__init__(**kwargs)        
         self.model = GatedConvGenerator(config, name="convolutions")
     
     def call(self, masked_gray, masked_edge, mask):
@@ -134,27 +117,8 @@ class EdgeGenerator(keras.Model):
 
 
 class InpaitingGenerator(keras.Model):
-    def __init__(self, config=None, **kwargs):
+    def __init__(self, config, **kwargs):
         super(InpaitingGenerator, self).__init__(**kwargs)
-        if config is None:
-            cnum = 32
-            config = [
-                {"mode":"conv", "chnl": cnum, "ksize":(5,5), "name":"conv1"},
-                {"mode":"conv", "chnl": 2*cnum, "stride":(2,2), "name":"conv2_downsample"},
-                {"mode":"conv", "chnl": 2*cnum, "name":"conv3"},
-                {"mode":"conv", "chnl": 4*cnum, "stride":(2,2), "name":"conv4_downsample"},
-                {"mode":"conv", "chnl": 4*cnum, "name":"conv5"},
-                {"mode":"conv", "chnl": 4*cnum, "d_factor":(2,2), "name":"conv6_astrous"},
-                {"mode":"conv", "chnl": 4*cnum, "d_factor":(4,4), "name":"conv7_astrous"},
-                {"mode":"conv", "chnl": 4*cnum, "d_factor":(8,8), "name":"conv8_astrous"},
-                {"mode":"conv", "chnl": 4*cnum, "d_factor":(16,16), "name":"conv9_astrous"},
-                {"mode":"conv", "chnl": 4*cnum, "name":"conv10"},
-                {"mode":"deconv", "chnl": 2*cnum, "name":"conv11_upsample"},
-                {"mode":"conv", "chnl": 2*cnum, "name":"conv12"},
-                {"mode":"deconv", "chnl": cnum, "name":"conv13_upsample"},
-                {"mode":"conv", "chnl": 3, "name":"conv14"},
-            ]
-        
         self.model = GatedConvGenerator(config, name="convolutions")
     
     def call(self, edge, masked_clr, mask):
