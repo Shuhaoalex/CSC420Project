@@ -29,7 +29,6 @@ class InpaitingModel:
                 self.load_checkpoint('ed')
                 self.load_checkpoint('ig')
                 self.load_checkpoint('id')
-                print("pretrained weights loaded")
             else:
                 for f in os.listdir(model_config['model_ckpoint_dir']):
                     os.remove(os.path.join(model_config['model_ckpoint_dir'], f))
@@ -40,12 +39,16 @@ class InpaitingModel:
     def load_checkpoint(self, model):
         if model == 'eg':
             self.edge_generator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "eg_weights"))
+            print("pretrained weights for edge generator loaded")
         elif model == "ed":
             self.edge_discriminator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "ed_weights"))
+            print("pretrained weights for edge discriminator loaded")
         elif model == "ig":
             self.inpainting_generator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "ig_weights"))
+            print("pretrained weights for inpainting generator loaded")
         elif model == 'id':
             self.inpainting_discriminator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "id_weights"))
+            print("pretrained weights for inpainting discriminator loaded")
 
     def check_pointing_edge_models(self):
         self.edge_generator.save_weights(os.path.join(self.config['model_ckpoint_dir'], "eg_weights"))

@@ -47,7 +47,7 @@
             "ckpoint_step": 500
         },
         "model_ckpoint_dir": "weights/",
-        "use_pretrained_weights": false
+        "use_pretrained_weights": true
     },
     "dataset_config":{
         "img_train_flist":"datasets/train_img.flist",
