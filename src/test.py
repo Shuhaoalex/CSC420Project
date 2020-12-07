@@ -15,8 +15,8 @@ model_config = config["model_config"]
 model_config["model_ckpoint_dir"] = os.path.join(job_folder, model_config["model_ckpoint_dir"])
 dataset = Dataset(dataset_config, dataset_config["img_train_flist"], dataset_config["mask_train_flist"], "train")
 model = InpaitingModel(model_config)
-
-batch_size = dataset_config["batch_size"]
+model.load_checkpoint('eg')
+model.load_checkpoint('ig')
 
 if model_config["edge"]["train"]:
     edge_dataset = dataset.get_edge_dataset().shuffle(dataset_config["batch_size"] * 50).batch(dataset_config["batch_size"]).prefetch(2)

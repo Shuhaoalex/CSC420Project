@@ -22,10 +22,10 @@ class InpaitingModel:
 
         try:
             if model_config['use_pretrained_weights']:
-                self.edge_generator.load_weights(os.path.join(model_config['model_ckpoint_dir'], "eg_weights"))
-                self.edge_discriminator.load_weights(os.path.join(model_config['model_ckpoint_dir'], "ed_weights"))
-                self.inpainting_generator.load_weights(os.path.join(model_config['model_ckpoint_dir'], "ig_weights"))
-                self.inpainting_discriminator.load_weights(os.path.join(model_config['model_ckpoint_dir'], "id_weights"))
+                self.load_checkpoint('eg')
+                self.load_checkpoint('ed')
+                self.load_checkpoint('ig')
+                self.load_checkpoint('id')
                 print("pretrained weights loaded")
             else:
                 for f in os.listdir(model_config['model_ckpoint_dir']):
@@ -34,6 +34,16 @@ class InpaitingModel:
         except:
             print("no available weights")
     
+    def load_checkpoint(self, model):
+        if model == 'eg':
+            self.edge_generator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "eg_weights"))
+        elif model == "ed":
+            self.edge_discriminator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "ed_weights"))
+        elif model == "ig":
+            self.inpainting_generator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "ig_weights"))
+        elif model == 'id':
+            self.inpainting_discriminator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "id_weights"))
+
     def check_pointing_edge_models(self):
         self.edge_generator.save_weights(os.path.join(self.config['model_ckpoint_dir'], "eg_weights"))
         self.edge_discriminator.save_weights(os.path.join(self.config['model_ckpoint_dir'], "ed_weights"))
@@ -94,14 +104,22 @@ class InpaitingModel:
         new_edge = self.infer_edge(clr_img, edge, mask)
         return self.infer_inpainting(clr_img, new_edge, mask)
     
-    def train_edge_part(self, edge_dataset, epochs=100):
+    def train_edge_part(self, edge_dataset, epochs=10, ckpoint_step=500):
+        i = 0
         for _ in range(epochs):
             for masked_gray, edge, mask in edge_dataset:
                 self.edge_train_step(masked_gray, edge, mask)
-            self.check_pointing_edge_models()
+                i += 1
+                if i % ckpoint_step == 0:
+                    self.check_pointing_edge_models()
+                    i = 0
     
-    def train_inpainting_part(self, clr_dataset, epochs=100):
+    def train_inpainting_part(self, clr_dataset, epochs=10, ckpoint_step=500):
+        i = 0
         for _ in range(epochs):
             for edge, clr_img, mask in clr_dataset:
                 self.inpainting_train_step(edge, clr_img, mask)
-            self.check_pointing_inpainting_models()
+                i += 1
+                if i % ckpoint_step == 0:
+                    self.check_pointing_inpainting_models()
+                    i = 0
