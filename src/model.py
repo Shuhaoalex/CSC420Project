@@ -111,51 +111,37 @@ class InpaitingModel:
         return self.infer_inpainting(clr_img, new_edge, mask)
     
     def train_edge_part(self, edge_dataset, epochs=10, ckpoint_step=100, element_per_epoch=None):
+        print("training edge part")
         if not self.ed_built:
             for masked_gray, edge, mask in edge_dataset:
                 self.edge_discriminator(edge)
                 self.ed_built = True
                 break
         for e in range(epochs):
-            if element_per_epoch is not None:
-                widgets = [
-                    'Edge Epoch {}/{}: '.format(e, epochs),
-                    progressbar.Percentage(),
-                    progressbar.Bar(),
-                    ' ',
-                    progressbar.Counter(format='%(value)d/%(max_value)d')
-                ]
-                bar = progressbar.ProgressBar(widgets=widgets, max_value=element_per_epoch).start()
+            print("trainning for epoch {}/{}".format(e, epochs))
             for i, (masked_gray, edge, mask) in enumerate(edge_dataset):
                 self.edge_train_step(masked_gray, edge, mask)
                 if i % ckpoint_step == 0:
                     self.check_pointing_edge_models()
                     i = 0
-                if element_per_epoch is not None:
-                    bar.update(i + 1)
+                if element_per_epoch is not None and (i % (element_per_epoch//100) == 0):
+                    print("{}/{}".format(i, element_per_epoch))
             self.check_pointing_edge_models()
     
     def train_inpainting_part(self, clr_dataset, epochs=10, ckpoint_step=100, element_per_epoch=None):
+        print("training inpainting part")
         if not self.id_built:
             for edge, clr_img, mask in clr_dataset:
                 self.inpainting_discriminator(clr_img)
                 self.id_built = True
                 break
         for e in range(epochs):
-            if element_per_epoch is not None:
-                widgets = [
-                    'Inpaiting Epoch {}/{}: '.format(e, epochs),
-                    progressbar.Percentage(),
-                    progressbar.Bar(),
-                    ' ',
-                    progressbar.Counter(format='%(value)d/%(max_value)d')
-                ]
-                bar = progressbar.ProgressBar(widgets=widgets, max_value=element_per_epoch).start()
+            print("trainning for epoch {}/{}".format(e, epochs))
             for i, (edge, clr_img, mask) in enumerate(clr_dataset):
                 self.inpainting_train_step(edge, clr_img, mask)
                 if i % ckpoint_step == 0:
                     self.check_pointing_inpainting_models()
                     i = 0
-                if element_per_epoch is not None:
-                    bar.update(i + 1)
+                if element_per_epoch is not None and (i % (element_per_epoch//100) == 0):
+                    print("{}/{}".format(i, element_per_epoch))
             self.check_pointing_edge_models()
