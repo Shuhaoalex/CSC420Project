@@ -55,7 +55,7 @@ class InpaitingModel:
         self.inpainting_generator.save_weights(os.path.join(self.config['model_ckpoint_dir'], "ig_weights"))
         self.inpainting_discriminator.save_weights(os.path.join(self.config['model_ckpoint_dir'], "id_weights"))
     
-    # @tf.function
+    @tf.function
     def edge_train_step(self, masked_gray_img, edge, mask):
         if not self.ed_built:
             self.edge_discriminator(edge)
@@ -73,7 +73,7 @@ class InpaitingModel:
         self.eg_opt.apply_gradients(zip(gen_grad, self.edge_generator.trainable_variables))
         self.ed_opt.apply_gradients(zip(disc_grad, self.edge_discriminator.trainable_variables))
  
-    # @tf.function
+    @tf.function
     def inpainting_train_step(self, edge, clr_img, mask):
         if not self.id_built:
             self.inpainting_discriminator(clr_img)
@@ -96,19 +96,19 @@ class InpaitingModel:
         self.ig_opt.apply_gradients(zip(gen_grad, self.inpainting_generator.trainable_variables))
         self.id_opt.apply_gradients(zip(disc_grad, self.inpainting_discriminator.trainable_variables))
     
-    # @tf.function
+    @tf.function
     def infer_edge(self, clr_img, edge, mask):
         grey_img = tf.image.rgb_to_grayscale(clr_img)
         masked_grey = grey_img * mask
         masked_edge = edge * mask
         return self.edge_generator(masked_grey, masked_edge, mask)
     
-    # @tf.function
+    @tf.function
     def infer_inpainting(self, clr_img, edge, mask):
         masked_clr = clr_img * mask
         return self.inpainting_generator(edge, masked_clr, mask)
     
-    # @tf.function
+    @tf.function
     def fused_infer(self, clr_img, edge, mask):
         new_edge = self.infer_edge(clr_img, edge, mask)
         return self.infer_inpainting(clr_img, new_edge, mask)
