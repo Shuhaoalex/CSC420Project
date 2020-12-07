@@ -19,7 +19,7 @@ model = InpaitingModel(model_config)
 batch_size = dataset_config["batch_size"]
 
 if model_config["edge"]["train"]:
-    edge_dataset = dataset.get_edge_dataset().shuffle(batch_size * 2).batch(batch_size).prefetch(10)
+    edge_dataset = dataset.get_edge_dataset().shuffle(batch_size * 50).batch(batch_size).prefetch(10)
     model.train_edge_part(edge_dataset, model_config["edge"]["train_epoch"], element_per_epoch=(dataset.size + batch_size - 1)//batch_size)
 
 # if model_config["clr"]["train"]:

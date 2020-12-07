@@ -37,25 +37,25 @@ class InpaitingModel:
     
     def load_checkpoint(self, model):
         if model == 'eg':
-            self.edge_generator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "eg_weights"))
+            self.edge_generator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "eg", "weights"))
             print("pretrained weights for edge generator loaded")
         elif model == "ed":
-            self.edge_discriminator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "ed_weights"))
+            self.edge_discriminator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "ed", "weights"))
             print("pretrained weights for edge discriminator loaded")
         elif model == "ig":
-            self.inpainting_generator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "ig_weights"))
+            self.inpainting_generator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "ig", "weights"))
             print("pretrained weights for inpainting generator loaded")
         elif model == 'id':
-            self.inpainting_discriminator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "id_weights"))
+            self.inpainting_discriminator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "id", "weights"))
             print("pretrained weights for inpainting discriminator loaded")
 
     def check_pointing_edge_models(self):
-        self.edge_generator.save_weights(os.path.join(self.config['model_ckpoint_dir'], "eg_weights"))
-        self.edge_discriminator.save_weights(os.path.join(self.config['model_ckpoint_dir'], "ed_weights"))
+        self.edge_generator.save_weights(os.path.join(self.config['model_ckpoint_dir'], "eg", "weights"))
+        self.edge_discriminator.save_weights(os.path.join(self.config['model_ckpoint_dir'], "ed", "weights"))
     
     def check_pointing_inpainting_models(self):
-        self.inpainting_generator.save_weights(os.path.join(self.config['model_ckpoint_dir'], "ig_weights"))
-        self.inpainting_discriminator.save_weights(os.path.join(self.config['model_ckpoint_dir'], "id_weights"))
+        self.inpainting_generator.save_weights(os.path.join(self.config['model_ckpoint_dir'], "ig", "weights"))
+        self.inpainting_discriminator.save_weights(os.path.join(self.config['model_ckpoint_dir'], "id", "weights"))
     
     # @tf.function
     def edge_train_step(self, masked_gray_img, edge, mask):
