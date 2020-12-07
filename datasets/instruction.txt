@@ -1,14 +1,7 @@
 Under ./datasets/.. folder
 folder structure could be like:
 --datasets
-------Places2 
-----------train
--------------.....
-----------test
--------------.....
-----------validation
--------------.....
-------celeba
+------Places2_celeba
 ----------train
 -------------.....
 ----------test
@@ -25,19 +18,11 @@ folder structure could be like:
 
 
 1. Images
-1.1 Use Places365-Standard, 
-    Reference link: http://places2.csail.mit.edu
-    Download link: http://places2.csail.mit.edu/download.html
-
-    Under "Data of Places365-Standard", under "Small images (256 * 256)", 
-    download train images, validation images and test images, where each one will be a separate folder.
-
-1.2 Use celeba,
-    Reference link: http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html
-    Download link: https://drive.google.com/drive/folders/0B7EVK8r0v71pTUZsaXdaSnZBZzg
-
-    Use cropped and align version, so donwload "img_align_celeba.zip" and unzip it. After unzipping, it will be a single folder. 
-    Move [0.jpg,...162770.jpg] under /celeba/train/, [162771.jpg ... 182637.jpg] under /celeba/validation/ and [182638.jpg ... 202599.jpg] under /celeba/test/
+1.1 Use Places365-Standard(small 265*265), and celeba(cropped and align version),
+    Reference link: http://places2.csail.mit.edu ,http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html
+    Download link: https://drive.google.com/file/d/1mdGFZqLgvkn67qnyE2YXQX7jas6q4E_M/view?usp=sharing
+    
+    Use subset of images of places and celeba as the training set.
 
 2. Irregular Masks
     Use qd-imd,

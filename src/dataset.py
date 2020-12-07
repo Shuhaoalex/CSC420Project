@@ -22,6 +22,7 @@ class Dataset(object):
         # read parameter values from the config file
         self.input_size = config["input_size"]
         self.sigma = config["sigma"]
+        self.size = len(self.img_list)
 
         # process the data we use
         self.edge_dataset = None
@@ -34,6 +35,9 @@ class Dataset(object):
 
     def get_color_dataset(self):
         return self.color_dataset
+    
+    def get_size(self):
+        return self.size
 
     # TODO: Add reference
     def load_flist(self, flist):
@@ -136,7 +140,7 @@ class Dataset(object):
 
         return crop_img
 
-def get_dataset(config, mode=None):
+def construct_dataset(config, mode=None):
     img_list, mask_list = None,None
     if mode == "train":
         img_list = config["img_train_flist"]
@@ -150,9 +154,7 @@ def get_dataset(config, mode=None):
 
     if img_list and mask_list:
         dataset = Dataset(config, img_list, mask_list, mode)
-        edge_dataset = dataset.get_edge_dataset()
-        color_dataset = dataset.get_color_dataset()
-        return edge_dataset, color_dataset
+        return dataset
 
 if __name__ == "__main__":
     # TODO: should initialize all variables to a config file
@@ -166,4 +168,7 @@ if __name__ == "__main__":
     
     # get neural network datasets
     # inputs: config file, dataset mode(train, test, validation)
-    # edge_dataset,color_dataset = get_dataset(config, mode="train")
+    dataset = construct_dataset(config, mode="train")
+    edge_dataset = dataset.get_color_dataset()
+    color_dataset = dataset.get_edge_dataset()
+    size = dataset.get_size()
