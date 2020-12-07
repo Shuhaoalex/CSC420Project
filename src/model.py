@@ -57,9 +57,6 @@ class InpaitingModel:
     
     @tf.function
     def edge_train_step(self, masked_gray_img, edge, mask):
-        if not self.ed_built:
-            self.edge_discriminator(edge)
-            self.ed_built = True
         masked_edge = mask * edge
         with tf.GradientTape(persistent=True) as tape:
             fake_edge = self.edge_generator(masked_gray_img, masked_edge, mask)
@@ -75,9 +72,6 @@ class InpaitingModel:
  
     @tf.function
     def inpainting_train_step(self, edge, clr_img, mask):
-        if not self.id_built:
-            self.inpainting_discriminator(clr_img)
-            self.id_built = True
         masked_clr = mask * clr_img
         with tf.GradientTape(persistent=True) as tape:
             fake_clr = self.inpainting_generator(edge, masked_clr, mask)
@@ -114,6 +108,11 @@ class InpaitingModel:
         return self.infer_inpainting(clr_img, new_edge, mask)
     
     def train_edge_part(self, edge_dataset, epochs=10, ckpoint_step=500, element_per_epoch=None):
+        if not self.ed_built:
+            for masked_gray, edge, mask in edge_dataset:
+                self.edge_discriminator(edge)
+                self.ed_built = True
+                break
         for e in range(epochs):
             if element_per_epoch is not None:
                 widgets = [
@@ -132,6 +131,11 @@ class InpaitingModel:
             self.check_pointing_edge_models()
     
     def train_inpainting_part(self, clr_dataset, epochs=10, ckpoint_step=500, element_per_epoch=None):
+        if not self.id_built:
+            for edge, clr_img, mask in clr_dataset:
+                self.inpainting_discriminator(clr_img)
+                self.id_built = True
+                break
         for e in range(epochs):
             if element_per_epoch is not None:
                 widgets = [
