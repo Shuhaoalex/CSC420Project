@@ -80,25 +80,31 @@ class GatedConvGenerator(keras.Model):
                     )
                 )
             elif c["mode"] == "conv":
-                self.convs.add(layers.Conv2D(
-                    c["chnl"],
-                    kernel_size=c.get("ksize", (3,3)),
-                    strides=c.get("stride", (1,1)),
-                    padding="same",
-                    dilation_rate=c.get("d_factor", (1,1)),
-                    use_bias=True,
-                    activation=None,
-                    name=c.get("name", "conv{}".format(i))))
+                self.convs.add(
+                    layers.Conv2D(
+                        c["chnl"],
+                        kernel_size=c.get("ksize", (3,3)),
+                        strides=c.get("stride", (1,1)),
+                        padding="same",
+                        dilation_rate=c.get("d_factor", (1,1)),
+                        use_bias=True,
+                        activation=None,
+                        name=c.get("name", "conv{}".format(i))
+                    )
+                )
             else:
-                self.convs.add(layers.Conv2DTranspose(
-                    c["chnl"],
-                    kernel_size=c.get("ksize", (3,3)),
-                    strides=c.get("stride", (2,2)),
-                    padding="same",
-                    dilation_rate=c.get("d_factor", (1,1)),
-                    use_bias=True,
-                    activation=None,
-                    name=c.get("name", "conv{}".format(i))))
+                self.convs.add(
+                    layers.Conv2DTranspose(
+                        c["chnl"],
+                        kernel_size=c.get("ksize", (3,3)),
+                        strides=c.get("stride", (2,2)),
+                        padding="same",
+                        dilation_rate=c.get("d_factor", (1,1)),
+                        use_bias=True,
+                        activation=None,
+                        name=c.get("name", "conv{}".format(i))
+                    )
+                )
         
     def call(self, inp):
         return self.convs(inp)
