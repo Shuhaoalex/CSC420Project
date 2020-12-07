@@ -119,6 +119,8 @@ class InpaitingModel:
                     'Edge Epoch {}/{}: '.format(e, epochs),
                     progressbar.Percentage(),
                     progressbar.Bar(),
+                    ' ',
+                    progressbar.Counter(format='%(value)d/%(max_value)d')
                 ]
                 bar = progressbar.ProgressBar(widgets=widgets, max_value=element_per_epoch).start()
             for i, (masked_gray, edge, mask) in enumerate(edge_dataset):
@@ -142,6 +144,8 @@ class InpaitingModel:
                     'Inpaiting Epoch {}/{}: '.format(e, epochs),
                     progressbar.Percentage(),
                     progressbar.Bar(),
+                    ' ',
+                    progressbar.Counter(format='%(value)d/%(max_value)d')
                 ]
                 bar = progressbar.ProgressBar(widgets=widgets, max_value=element_per_epoch).start()
             for i, (edge, clr_img, mask) in enumerate(clr_dataset):
