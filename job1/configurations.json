@@ -50,10 +50,10 @@
         "use_pretrained_weights": false
     },
     "dataset_config":{
-        "img_train_flist":"../datasets/celeba_train.flist",
+        "img_train_flist":"datasets/train_img.flist",
         "img_test_flist":"../datasets/celeba_test.flist",
         "img_validation_flist":"../datasets/celeba_validation.flist",
-        "mask_train_flist":"../datasets/mask_train.flist",
+        "mask_train_flist":"datasets/train_mask.flist",
         "mask_validation_flist":"../datasets/mask_validation.flist",
         "mask_test_flist":"../datasets/mask_test_test.flist",
         "sigma":2, "input_size":256, "batch_size": 50

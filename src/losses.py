@@ -10,18 +10,18 @@ class EdgeDiscriminator(keras.Model):
 
     def build(self, input_shape):
         img_shape = input_shape[1:]
-        input_x = layers.Input(img_shape)
-        input_y = layers.Input(img_shape)
+        input_x = keras.Input((img_shape[0], img_shape[1], img_shape[2]))
+        input_y = keras.Input((img_shape[0], img_shape[1], img_shape[2]))
         curr_x = input_x
         curr_y = input_y
         FMLoss = 0
-        conv_sz = [64, 128, 256, 512]
+        conv_sz = [16, 32, 64, 128]
         for i, sz in enumerate(conv_sz):
             curr_layer = keras.Sequential((layers.Conv2D(filters=sz, kernel_size=[4,4], strides=[2,2], padding='same', use_bias=True, name="conv{}".format(i)), layers.LeakyReLU(0.2)))
             curr_x = curr_layer(curr_x)
             curr_y = curr_layer(curr_y)
             FMLoss += tf.reduce_mean(tf.abs(curr_x - curr_y))
-        FMLoss /= 4
+        FMLoss /= 4.0
 
         flatten_layer = layers.Flatten()
         curr_x = flatten_layer(curr_x)
@@ -46,7 +46,8 @@ class EdgeDiscriminator(keras.Model):
                    tf.reduce_mean(
                            tf.nn.sigmoid_cross_entropy_with_logits(
                            tf.ones(tf.shape(fake_logit)), fake_logit))
-        return gen_loss, self.LFM(fake_img, true_img)
+        FMLoss = self.LFM((fake_img, true_img))
+        return gen_loss, FMLoss
 
     def discriminator_loss(self, fake_img, true_img):
         fake_logit = self.pred_logit(fake_img)
@@ -63,16 +64,16 @@ class InpaintingDiscriminator(keras.Model):
     def __init__(self, **kwargs):
         super(InpaintingDiscriminator, self).__init__(**kwargs)
         self.model = keras.Sequential((
-            layers.Conv2D(filters=64, kernel_size=[4,4], strides=[2,2], padding="same", use_bias=True, name="conv0"),
+            layers.Conv2D(filters=32, kernel_size=[4,4], strides=[2,2], padding="same", use_bias=True, name="conv0"),
             layers.LeakyReLU(0.2),
-            layers.Conv2D(filters=128, kernel_size=[4,4], strides=[2,2], padding="same", use_bias=True, name="conv1"),
+            layers.Conv2D(filters=64, kernel_size=[4,4], strides=[2,2], padding="same", use_bias=True, name="conv1"),
             layers.LeakyReLU(0.2),
-            layers.Conv2D(filters=256, kernel_size=[4,4], strides=[2,2], padding="same", use_bias=True, name="conv2"),
+            layers.Conv2D(filters=128, kernel_size=[4,4], strides=[2,2], padding="same", use_bias=True, name="conv2"),
             layers.LeakyReLU(0.2),
-            layers.Conv2D(filters=512, kernel_size=[4,4], strides=[2,2], padding="same", use_bias=True, name="conv3"),
+            layers.Conv2D(filters=256, kernel_size=[4,4], strides=[2,2], padding="same", use_bias=True, name="conv3"),
             layers.LeakyReLU(0.2),
             layers.Flatten(),
-            layers.Dense(layers.Dense(units=1, use_bias=True, name='fc'))
+            layers.Dense(units=1, use_bias=True, name='fc')
         ))
     
     def call(self, img):

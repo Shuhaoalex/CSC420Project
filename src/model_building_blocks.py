@@ -65,7 +65,7 @@ class GatedConvGenerator(keras.Model):
                         c["chnl"],
                         ksize=c.get("ksize", (3,3)),
                         strides=c.get("stride", (1,1)),
-                        dialation_rate=c.get("d_factor", (1,1)),
+                        dilation_rate=c.get("d_factor", (1,1)),
                         name=c.get("name", "conv{}".format(i))
                     )
                 )
@@ -75,7 +75,7 @@ class GatedConvGenerator(keras.Model):
                         c["chnl"],
                         ksize=c.get("ksize", (3,3)),
                         strides=c.get("stride", (2,2)),
-                        dialation_rate=c.get("d_factor", (1,1)),
+                        dilation_rate=c.get("d_factor", (1,1)),
                         name=c.get("name", "conv{}".format(i))
                     )
                 )

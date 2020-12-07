@@ -10,10 +10,9 @@ import json
 job_folder = "job1"
 with open(os.path.join(job_folder, 'configurations.json'), 'r') as f:
     config = json.load(f)
-dataset_config = config["dataset_config"]
 model_config = config["model_config"]
 model_config["model_ckpoint_dir"] = os.path.join(job_folder, model_config["model_ckpoint_dir"])
-dataset = Dataset(dataset_config, dataset_config["img_train_flist"], dataset_config["mask_train_flist"], "train")
+
 model = InpaitingModel(model_config)
 model.load_checkpoint('eg')
 model.load_checkpoint('ig')

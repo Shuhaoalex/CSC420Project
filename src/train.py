@@ -6,8 +6,8 @@ import os
 import sys
 import json
 
-# folder = sys.argv[1]
-job_folder = "job1"
+job_folder = sys.argv[1]
+# job_folder = "job1"
 with open(os.path.join(job_folder, 'configurations.json'), 'r') as f:
     config = json.load(f)
 dataset_config = config["dataset_config"]
@@ -19,9 +19,9 @@ model = InpaitingModel(model_config)
 batch_size = dataset_config["batch_size"]
 
 if model_config["edge"]["train"]:
-    edge_dataset = dataset.get_edge_dataset().shuffle(dataset_config["batch_size"] * 50).batch(dataset_config["batch_size"]).prefetch(2)
-    model.train_edge_part(edge_dataset, model_config["edge"]["train_epoch"])
+    edge_dataset = dataset.get_edge_dataset().shuffle(batch_size * 2).batch(batch_size).prefetch(2)
+    model.train_edge_part(edge_dataset, model_config["edge"]["train_epoch"], element_per_epoch=(dataset.size + batch_size - 1)//batch_size)
 
-if model_config["clr"]["train"]:
-    edge_dataset = dataset.get_edge_dataset().shuffle(dataset_config["batch_size"] * 50).batch(dataset_config["batch_size"]).prefetch(2)
-    model.train_inpainting_part(edge_dataset, model_config["clr"]["train_epoch"])
+# if model_config["clr"]["train"]:
+#     color_dataset = dataset.get_color_dataset().shuffle(batch_size * 2).batch(batch_size).prefetch(2)
+#     model.train_inpainting_part(color_dataset, model_config["clr"]["train_epoch"], element_per_epoch=(dataset.size + batch_size - 1)//batch_size)
