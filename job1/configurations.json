@@ -16,7 +16,10 @@
                 {"mode":"gconv", "chnl": 16, "name":"conv12"},
                 {"mode":"gdeconv", "chnl": 8, "name":"conv13_upsample"},
                 {"mode":"conv", "chnl": 1, "name":"conv14"}
-            ]
+            ],
+            "train": true,
+            "train_epoch": 3,
+            "ckpoint_step": 500
         },
         "clr": {
             "lamb_l1": 1,
@@ -38,7 +41,10 @@
                 {"mode":"gconv", "chnl": 32, "name":"conv12"},
                 {"mode":"gdeconv", "chnl": 16, "name":"conv13_upsample"},
                 {"mode":"conv", "chnl": 3, "name":"conv14"}
-            ]
+            ],
+            "train": true,
+            "train_epoch" : 3,
+            "ckpoint_step": 500
         },
         "model_ckpoint_dir": "weights/",
         "use_pretrained_weights": false
@@ -50,6 +56,6 @@
         "mask_train_flist":"../datasets/mask_train.flist",
         "mask_validation_flist":"../datasets/mask_validation.flist",
         "mask_test_flist":"../datasets/mask_test_test.flist",
-        "sigma":2, "input_size":256
+        "sigma":2, "input_size":256, "batch_size": 50
     }
 }
