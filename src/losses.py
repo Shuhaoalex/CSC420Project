@@ -2,7 +2,6 @@ import tensorflow as tf
 import numpy as np
 import tensorflow.keras as keras
 from tensorflow.keras import layers
-import cv2 as cv
 
 class EdgeDiscriminator(keras.Model):
     def __init__(self, **kwargs):
