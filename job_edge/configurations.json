@@ -18,7 +18,7 @@
                 {"mode":"conv", "chnl": 1, "name":"conv14"}
             ],
             "train": true,
-            "train_epoch": 3,
+            "train_epoch": 10,
             "ckpoint_step": 50
         },
         "clr": {
@@ -43,11 +43,11 @@
                 {"mode":"conv", "chnl": 3, "name":"conv14"}
             ],
             "train": false,
-            "train_epoch" : 3,
+            "train_epoch" : 10,
             "ckpoint_step": 50
         },
         "model_ckpoint_dir": "weights/",
-        "use_pretrained_weights": true
+        "use_pretrained_weights": false
     },
     "dataset_config":{
         "img_train_flist":"datasets/train_img.flist",

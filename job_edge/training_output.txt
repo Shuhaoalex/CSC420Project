@@ -1,0 +1,855 @@
+2020-12-08 00:13:38.159182: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcuda.so.1
+2020-12-08 00:13:38.207685: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1555] Found device 0 with properties: 
+pciBusID: 0000:3b:00.0 name: TITAN RTX computeCapability: 7.5
+coreClock: 1.77GHz coreCount: 72 deviceMemorySize: 23.65GiB deviceMemoryBandwidth: 625.94GiB/s
+2020-12-08 00:13:38.208572: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1555] Found device 1 with properties: 
+pciBusID: 0000:af:00.0 name: TITAN RTX computeCapability: 7.5
+coreClock: 1.77GHz coreCount: 72 deviceMemorySize: 23.65GiB deviceMemoryBandwidth: 625.94GiB/s
+2020-12-08 00:13:38.209460: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudart.so.10.1
+2020-12-08 00:13:38.212494: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcublas.so.10
+2020-12-08 00:13:38.214893: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcufft.so.10
+2020-12-08 00:13:38.215903: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcurand.so.10
+2020-12-08 00:13:38.218087: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusolver.so.10
+2020-12-08 00:13:38.219304: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusparse.so.10
+2020-12-08 00:13:38.222935: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudnn.so.7
+2020-12-08 00:13:38.226268: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1697] Adding visible gpu devices: 0, 1
+2020-12-08 00:13:38.226917: I tensorflow/core/platform/cpu_feature_guard.cc:142] Your CPU supports instructions that this TensorFlow binary was not compiled to use: SSE4.1 SSE4.2 AVX AVX2 AVX512F FMA
+2020-12-08 00:13:38.238236: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2200000000 Hz
+2020-12-08 00:13:38.239740: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x55b1df86eda0 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2020-12-08 00:13:38.239764: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2020-12-08 00:13:38.481783: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1555] Found device 0 with properties: 
+pciBusID: 0000:3b:00.0 name: TITAN RTX computeCapability: 7.5
+coreClock: 1.77GHz coreCount: 72 deviceMemorySize: 23.65GiB deviceMemoryBandwidth: 625.94GiB/s
+2020-12-08 00:13:38.482640: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1555] Found device 1 with properties: 
+pciBusID: 0000:af:00.0 name: TITAN RTX computeCapability: 7.5
+coreClock: 1.77GHz coreCount: 72 deviceMemorySize: 23.65GiB deviceMemoryBandwidth: 625.94GiB/s
+2020-12-08 00:13:38.482713: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudart.so.10.1
+2020-12-08 00:13:38.482726: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcublas.so.10
+2020-12-08 00:13:38.482737: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcufft.so.10
+2020-12-08 00:13:38.482748: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcurand.so.10
+2020-12-08 00:13:38.482759: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusolver.so.10
+2020-12-08 00:13:38.482770: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcusparse.so.10
+2020-12-08 00:13:38.482781: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudnn.so.7
+2020-12-08 00:13:38.485900: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1697] Adding visible gpu devices: 0, 1
+2020-12-08 00:13:38.485954: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudart.so.10.1
+2020-12-08 00:13:38.488399: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1096] Device interconnect StreamExecutor with strength 1 edge matrix:
+2020-12-08 00:13:38.488414: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1102]      0 1 
+2020-12-08 00:13:38.488420: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1115] 0:   N N 
+2020-12-08 00:13:38.488424: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1115] 1:   N N 
+2020-12-08 00:13:38.491725: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1241] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 22828 MB memory) -> physical GPU (device: 0, name: TITAN RTX, pci bus id: 0000:3b:00.0, compute capability: 7.5)
+2020-12-08 00:13:38.493798: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1241] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:1 with 22838 MB memory) -> physical GPU (device: 1, name: TITAN RTX, pci bus id: 0000:af:00.0, compute capability: 7.5)
+2020-12-08 00:13:38.496402: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x55b1e1b39d60 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+2020-12-08 00:13:38.496421: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): TITAN RTX, Compute Capability 7.5
+2020-12-08 00:13:38.496426: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (1): TITAN RTX, Compute Capability 7.5
+ignored pretrained results
+training edge part
+trainning for epoch 0/10
+2020-12-08 00:13:48.801930: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 243 of 1000
+2020-12-08 00:13:58.784116: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 522 of 1000
+2020-12-08 00:14:08.803187: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 788 of 1000
+2020-12-08 00:14:17.146066: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:199] Shuffle buffer filled.
+2020-12-08 00:14:18.214258: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcudnn.so.7
+2020-12-08 00:14:20.797343: I tensorflow/stream_executor/platform/default/dso_loader.cc:44] Successfully opened dynamic library libcublas.so.10
+0/7309
+73/7309
+146/7309
+219/7309
+292/7309
+365/7309
+438/7309
+511/7309
+584/7309
+657/7309
+730/7309
+803/7309
+876/7309
+949/7309
+1022/7309
+1095/7309
+1168/7309
+1241/7309
+1314/7309
+1387/7309
+1460/7309
+1533/7309
+1606/7309
+1679/7309
+1752/7309
+1825/7309
+1898/7309
+1971/7309
+2044/7309
+2117/7309
+2190/7309
+2263/7309
+2336/7309
+2409/7309
+2482/7309
+2555/7309
+2628/7309
+2701/7309
+2774/7309
+2847/7309
+2920/7309
+2993/7309
+3066/7309
+3139/7309
+3212/7309
+3285/7309
+3358/7309
+3431/7309
+3504/7309
+3577/7309
+3650/7309
+3723/7309
+3796/7309
+3869/7309
+3942/7309
+4015/7309
+4088/7309
+4161/7309
+4234/7309
+4307/7309
+4380/7309
+4453/7309
+4526/7309
+4599/7309
+4672/7309
+4745/7309
+4818/7309
+4891/7309
+4964/7309
+5037/7309
+5110/7309
+5183/7309
+5256/7309
+5329/7309
+5402/7309
+5475/7309
+5548/7309
+5621/7309
+5694/7309
+5767/7309
+5840/7309
+5913/7309
+5986/7309
+6059/7309
+6132/7309
+6205/7309
+6278/7309
+6351/7309
+6424/7309
+6497/7309
+6570/7309
+6643/7309
+6716/7309
+6789/7309
+6862/7309
+6935/7309
+7008/7309
+7081/7309
+7154/7309
+7227/7309
+7300/7309
+trainning for epoch 1/10
+2020-12-08 02:08:00.524247: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 273 of 1000
+2020-12-08 02:08:10.528636: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 553 of 1000
+2020-12-08 02:08:20.528006: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 810 of 1000
+2020-12-08 02:08:28.323232: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:199] Shuffle buffer filled.
+0/7309
+73/7309
+146/7309
+219/7309
+292/7309
+365/7309
+438/7309
+511/7309
+584/7309
+657/7309
+730/7309
+803/7309
+876/7309
+949/7309
+1022/7309
+1095/7309
+1168/7309
+1241/7309
+1314/7309
+1387/7309
+1460/7309
+1533/7309
+1606/7309
+1679/7309
+1752/7309
+1825/7309
+1898/7309
+1971/7309
+2044/7309
+2117/7309
+2190/7309
+2263/7309
+2336/7309
+2409/7309
+2482/7309
+2555/7309
+2628/7309
+2701/7309
+2774/7309
+2847/7309
+2920/7309
+2993/7309
+3066/7309
+3139/7309
+3212/7309
+3285/7309
+3358/7309
+3431/7309
+3504/7309
+3577/7309
+3650/7309
+3723/7309
+3796/7309
+3869/7309
+3942/7309
+4015/7309
+4088/7309
+4161/7309
+4234/7309
+4307/7309
+4380/7309
+4453/7309
+4526/7309
+4599/7309
+4672/7309
+4745/7309
+4818/7309
+4891/7309
+4964/7309
+5037/7309
+5110/7309
+5183/7309
+5256/7309
+5329/7309
+5402/7309
+5475/7309
+5548/7309
+5621/7309
+5694/7309
+5767/7309
+5840/7309
+5913/7309
+5986/7309
+6059/7309
+6132/7309
+6205/7309
+6278/7309
+6351/7309
+6424/7309
+6497/7309
+6570/7309
+6643/7309
+6716/7309
+6789/7309
+6862/7309
+6935/7309
+7008/7309
+7081/7309
+7154/7309
+7227/7309
+7300/7309
+trainning for epoch 2/10
+2020-12-08 03:56:41.811947: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 321 of 1000
+2020-12-08 03:56:51.806216: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 641 of 1000
+2020-12-08 03:57:01.837648: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 873 of 1000
+2020-12-08 03:57:06.596145: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:199] Shuffle buffer filled.
+0/7309
+73/7309
+146/7309
+219/7309
+292/7309
+365/7309
+438/7309
+511/7309
+584/7309
+657/7309
+730/7309
+803/7309
+876/7309
+949/7309
+1022/7309
+1095/7309
+1168/7309
+1241/7309
+1314/7309
+1387/7309
+1460/7309
+1533/7309
+1606/7309
+1679/7309
+1752/7309
+1825/7309
+1898/7309
+1971/7309
+2044/7309
+2117/7309
+2190/7309
+2263/7309
+2336/7309
+2409/7309
+2482/7309
+2555/7309
+2628/7309
+2701/7309
+2774/7309
+2847/7309
+2920/7309
+2993/7309
+3066/7309
+3139/7309
+3212/7309
+3285/7309
+3358/7309
+3431/7309
+3504/7309
+3577/7309
+3650/7309
+3723/7309
+3796/7309
+3869/7309
+3942/7309
+4015/7309
+4088/7309
+4161/7309
+4234/7309
+4307/7309
+4380/7309
+4453/7309
+4526/7309
+4599/7309
+4672/7309
+4745/7309
+4818/7309
+4891/7309
+4964/7309
+5037/7309
+5110/7309
+5183/7309
+5256/7309
+5329/7309
+5402/7309
+5475/7309
+5548/7309
+5621/7309
+5694/7309
+5767/7309
+5840/7309
+5913/7309
+5986/7309
+6059/7309
+6132/7309
+6205/7309
+6278/7309
+6351/7309
+6424/7309
+6497/7309
+6570/7309
+6643/7309
+6716/7309
+6789/7309
+6862/7309
+6935/7309
+7008/7309
+7081/7309
+7154/7309
+7227/7309
+7300/7309
+trainning for epoch 3/10
+2020-12-08 05:37:59.455552: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 289 of 1000
+2020-12-08 05:38:09.437647: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 556 of 1000
+2020-12-08 05:38:19.449144: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 807 of 1000
+2020-12-08 05:38:28.000249: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:199] Shuffle buffer filled.
+0/7309
+73/7309
+146/7309
+219/7309
+292/7309
+365/7309
+438/7309
+511/7309
+584/7309
+657/7309
+730/7309
+803/7309
+876/7309
+949/7309
+1022/7309
+1095/7309
+1168/7309
+1241/7309
+1314/7309
+1387/7309
+1460/7309
+1533/7309
+1606/7309
+1679/7309
+1752/7309
+1825/7309
+1898/7309
+1971/7309
+2044/7309
+2117/7309
+2190/7309
+2263/7309
+2336/7309
+2409/7309
+2482/7309
+2555/7309
+2628/7309
+2701/7309
+2774/7309
+2847/7309
+2920/7309
+2993/7309
+3066/7309
+3139/7309
+3212/7309
+3285/7309
+3358/7309
+3431/7309
+3504/7309
+3577/7309
+3650/7309
+3723/7309
+3796/7309
+3869/7309
+3942/7309
+4015/7309
+4088/7309
+4161/7309
+4234/7309
+4307/7309
+4380/7309
+4453/7309
+4526/7309
+4599/7309
+4672/7309
+4745/7309
+4818/7309
+4891/7309
+4964/7309
+5037/7309
+5110/7309
+5183/7309
+5256/7309
+5329/7309
+5402/7309
+5475/7309
+5548/7309
+5621/7309
+5694/7309
+5767/7309
+5840/7309
+5913/7309
+5986/7309
+6059/7309
+6132/7309
+6205/7309
+6278/7309
+6351/7309
+6424/7309
+6497/7309
+6570/7309
+6643/7309
+6716/7309
+6789/7309
+6862/7309
+6935/7309
+7008/7309
+7081/7309
+7154/7309
+7227/7309
+7300/7309
+trainning for epoch 4/10
+2020-12-08 07:19:39.777530: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 307 of 1000
+2020-12-08 07:19:49.790137: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 594 of 1000
+2020-12-08 07:19:59.777626: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 854 of 1000
+2020-12-08 07:20:05.622983: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:199] Shuffle buffer filled.
+0/7309
+73/7309
+146/7309
+219/7309
+292/7309
+365/7309
+438/7309
+511/7309
+584/7309
+657/7309
+730/7309
+803/7309
+876/7309
+949/7309
+1022/7309
+1095/7309
+1168/7309
+1241/7309
+1314/7309
+1387/7309
+1460/7309
+1533/7309
+1606/7309
+1679/7309
+1752/7309
+1825/7309
+1898/7309
+1971/7309
+2044/7309
+2117/7309
+2190/7309
+2263/7309
+2336/7309
+2409/7309
+2482/7309
+2555/7309
+2628/7309
+2701/7309
+2774/7309
+2847/7309
+2920/7309
+2993/7309
+3066/7309
+3139/7309
+3212/7309
+3285/7309
+3358/7309
+3431/7309
+3504/7309
+3577/7309
+3650/7309
+3723/7309
+3796/7309
+3869/7309
+3942/7309
+4015/7309
+4088/7309
+4161/7309
+4234/7309
+4307/7309
+4380/7309
+4453/7309
+4526/7309
+4599/7309
+4672/7309
+4745/7309
+4818/7309
+4891/7309
+4964/7309
+5037/7309
+5110/7309
+5183/7309
+5256/7309
+5329/7309
+5402/7309
+5475/7309
+5548/7309
+5621/7309
+5694/7309
+5767/7309
+5840/7309
+5913/7309
+5986/7309
+6059/7309
+6132/7309
+6205/7309
+6278/7309
+6351/7309
+6424/7309
+6497/7309
+6570/7309
+6643/7309
+6716/7309
+6789/7309
+6862/7309
+6935/7309
+7008/7309
+7081/7309
+7154/7309
+7227/7309
+7300/7309
+trainning for epoch 5/10
+2020-12-08 09:00:10.431863: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 277 of 1000
+2020-12-08 09:00:20.409427: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 560 of 1000
+2020-12-08 09:00:30.431930: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 855 of 1000
+2020-12-08 09:00:35.417372: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:199] Shuffle buffer filled.
+0/7309
+73/7309
+146/7309
+219/7309
+292/7309
+365/7309
+438/7309
+511/7309
+584/7309
+657/7309
+730/7309
+803/7309
+876/7309
+949/7309
+1022/7309
+1095/7309
+1168/7309
+1241/7309
+1314/7309
+1387/7309
+1460/7309
+1533/7309
+1606/7309
+1679/7309
+1752/7309
+1825/7309
+1898/7309
+1971/7309
+2044/7309
+2117/7309
+2190/7309
+2263/7309
+2336/7309
+2409/7309
+2482/7309
+2555/7309
+2628/7309
+2701/7309
+2774/7309
+2847/7309
+2920/7309
+2993/7309
+3066/7309
+3139/7309
+3212/7309
+3285/7309
+3358/7309
+3431/7309
+3504/7309
+3577/7309
+3650/7309
+3723/7309
+3796/7309
+3869/7309
+3942/7309
+4015/7309
+4088/7309
+4161/7309
+4234/7309
+4307/7309
+4380/7309
+4453/7309
+4526/7309
+4599/7309
+4672/7309
+4745/7309
+4818/7309
+4891/7309
+4964/7309
+5037/7309
+5110/7309
+5183/7309
+5256/7309
+5329/7309
+5402/7309
+5475/7309
+5548/7309
+5621/7309
+5694/7309
+5767/7309
+5840/7309
+5913/7309
+5986/7309
+6059/7309
+6132/7309
+6205/7309
+6278/7309
+6351/7309
+6424/7309
+6497/7309
+6570/7309
+6643/7309
+6716/7309
+6789/7309
+6862/7309
+6935/7309
+7008/7309
+7081/7309
+7154/7309
+7227/7309
+7300/7309
+trainning for epoch 6/10
+2020-12-08 10:41:22.931055: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 322 of 1000
+2020-12-08 10:41:32.920032: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 608 of 1000
+2020-12-08 10:41:42.937391: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 895 of 1000
+2020-12-08 10:41:46.616902: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:199] Shuffle buffer filled.
+0/7309
+73/7309
+146/7309
+219/7309
+292/7309
+365/7309
+438/7309
+511/7309
+584/7309
+657/7309
+730/7309
+803/7309
+876/7309
+949/7309
+1022/7309
+1095/7309
+1168/7309
+1241/7309
+1314/7309
+1387/7309
+1460/7309
+1533/7309
+1606/7309
+1679/7309
+1752/7309
+1825/7309
+1898/7309
+1971/7309
+2044/7309
+2117/7309
+2190/7309
+2263/7309
+2336/7309
+2409/7309
+2482/7309
+2555/7309
+2628/7309
+2701/7309
+2774/7309
+2847/7309
+2920/7309
+2993/7309
+3066/7309
+3139/7309
+3212/7309
+3285/7309
+3358/7309
+3431/7309
+3504/7309
+3577/7309
+3650/7309
+3723/7309
+3796/7309
+3869/7309
+3942/7309
+4015/7309
+4088/7309
+4161/7309
+4234/7309
+4307/7309
+4380/7309
+4453/7309
+4526/7309
+4599/7309
+4672/7309
+4745/7309
+4818/7309
+4891/7309
+4964/7309
+5037/7309
+5110/7309
+5183/7309
+5256/7309
+5329/7309
+5402/7309
+5475/7309
+5548/7309
+5621/7309
+5694/7309
+5767/7309
+5840/7309
+5913/7309
+5986/7309
+6059/7309
+6132/7309
+6205/7309
+6278/7309
+6351/7309
+6424/7309
+6497/7309
+6570/7309
+6643/7309
+6716/7309
+6789/7309
+6862/7309
+6935/7309
+7008/7309
+7081/7309
+7154/7309
+7227/7309
+7300/7309
+trainning for epoch 7/10
+2020-12-08 12:22:55.904415: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 260 of 1000
+2020-12-08 12:23:05.941470: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 480 of 1000
+2020-12-08 12:23:15.916958: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:150] Filling up shuffle buffer (this may take a while): 775 of 1000
+2020-12-08 12:23:23.709035: I tensorflow/core/kernels/data/shuffle_dataset_op.cc:199] Shuffle buffer filled.
+0/7309
+73/7309
+146/7309
+219/7309
+292/7309
+365/7309
+438/7309
+511/7309
+584/7309
+657/7309
+730/7309
+803/7309
+876/7309
+949/7309
+1022/7309
+1095/7309
+1168/7309
+1241/7309
+1314/7309
+1387/7309
+1460/7309
+1533/7309
+1606/7309
+1679/7309
+1752/7309
+1825/7309
+1898/7309
+1971/7309
+2044/7309
+2117/7309
+2190/7309
+2263/7309
+2336/7309
+2409/7309
+2482/7309
+2555/7309
+2628/7309
+2701/7309
+2774/7309
+2847/7309
+2920/7309
+2993/7309
+3066/7309
+3139/7309
+3212/7309
+3285/7309
+3358/7309
+3431/7309
+3504/7309
+3577/7309
+3650/7309
+3723/7309
+3796/7309
+3869/7309
+3942/7309
+4015/7309
+4088/7309
+4161/7309
+4234/7309
+4307/7309
+4380/7309
