@@ -62,7 +62,7 @@ class InpaitingModel:
     
     @tf.function
     def edge_train_step(self, gray_img, edge, mask):
-        gray_img = tf.cast(gray_img, tf.float32) / 127.5 - 1
+        gray_img = tf.cast(gray_img, tf.float32) / 127.5 - 1.0
         edge = tf.cast(edge, tf.float32)
         mask = tf.cast(mask, tf.float32)
         masked_gray_img = mask * gray_img
@@ -84,7 +84,7 @@ class InpaitingModel:
     @tf.function
     def inpainting_train_step(self, edge, clr_img, mask):
         edge = tf.cast(edge, tf.float32)
-        clr_img = tf.cast(clr_img, tf.float32) / 127.5 - 1
+        clr_img = tf.cast(clr_img, tf.float32) / 127.5 - 1.0
         mask = tf.cast(mask, tf.float32)
         masked_clr = mask * clr_img
         with tf.GradientTape(persistent=True) as tape:
@@ -106,7 +106,7 @@ class InpaitingModel:
     
     @tf.function
     def infer_edge(self, gray_img, edge, mask):
-        gray_img = tf.cast(gray_img, tf.float32)
+        gray_img = tf.cast(gray_img, tf.float32) / 127.5 - 1.0
         edge = tf.cast(edge, tf.float32)
         mask = tf.cast(mask, tf.float32)
         masked_gray = gray_img * mask
@@ -115,7 +115,7 @@ class InpaitingModel:
     
     @tf.function
     def infer_inpainting(self, clr_img, edge, mask):
-        clr_img = tf.cast(clr_img, tf.float32)
+        clr_img = tf.cast(clr_img, tf.float32) / 127.5 - 1.0
         edge = tf.cast(edge, tf.float32)
         mask = tf.cast(mask, tf.float32)
         masked_clr = clr_img * mask
