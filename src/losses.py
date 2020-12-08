@@ -14,18 +14,17 @@ class EdgeDiscriminator(keras.Model):
                     kernel_size=[4,4],
                     strides=[2,2],
                     padding='same',
-                    use_bias=True,
-                    name="conv{}".format(i)
+                    use_bias=True, 
                 ),
                 layers.LeakyReLU(0.2)
-            ))
+            ), name="conv{}".format(i))
             for i, sz in enumerate(conv_sz)
         ]
 
         self.post_process = keras.Sequential((
             layers.Flatten(),
             layers.Dense(units=1, use_bias=True, name='fc')
-        ))
+        ), name="flatten")
     
     def pred_logit(self, img):
         for conv in self.convs:
