@@ -123,8 +123,8 @@ class InpaitingModel:
         return tf.cast((self.inpainting_generator(edge, masked_clr, mask) + 1) * 127.5, tf.uint8)
     
     @tf.function
-    def fused_infer(self, clr_img, edge, mask):
-        new_edge = self.infer_edge(clr_img, edge, mask)
+    def fused_infer(self, gray_img, clr_img, edge, mask):
+        new_edge = self.infer_edge(gray_img, edge, mask)
         return self.infer_inpainting(clr_img, new_edge, mask)
     
     def train_edge_part(self, edge_dataset, epochs=10, ckpoint_step=100, element_per_epoch=None):
