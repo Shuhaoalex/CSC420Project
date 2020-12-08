@@ -143,4 +143,4 @@ class InpaitingModel:
                     self.check_pointing_inpainting_models()
                 if element_per_epoch is not None and (i % (element_per_epoch//100) == 0):
                     print("{}/{}".format(i, element_per_epoch))
-            self.check_pointing_edge_models()
+            self.check_pointing_inpainting_models()
