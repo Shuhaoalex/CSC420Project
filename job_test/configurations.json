@@ -17,7 +17,7 @@
                 {"mode":"gdeconv", "chnl": 8, "name":"conv13_upsample"},
                 {"mode":"conv", "chnl": 1, "name":"conv14"}
             ],
-            "train": true,
+            "train": false,
             "train_epoch": 3,
             "ckpoint_step": 500
         },
@@ -42,7 +42,7 @@
                 {"mode":"gdeconv", "chnl": 16, "name":"conv13_upsample"},
                 {"mode":"conv", "chnl": 3, "name":"conv14"}
             ],
-            "train": true,
+            "train": false,
             "train_epoch" : 3,
             "ckpoint_step": 500
         },
