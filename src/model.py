@@ -22,32 +22,35 @@ class InpaitingModel:
 
         self.perceptual_and_style_loss = PerceptuaAndStylelLoss(name="PL_Loss")
 
-        try:
-            if model_config['use_pretrained_weights']:
-                self.load_checkpoint('eg')
-                self.load_checkpoint('ed')
-                self.load_checkpoint('ig')
-                self.load_checkpoint('id')
-            else:
-                for f in os.listdir(model_config['model_ckpoint_dir']):
-                    os.remove(os.path.join(model_config['model_ckpoint_dir'], f))
-                print("ignored pretrained results")
-        except:
-            print("no available weights")
+        # try:
+        if model_config['use_pretrained_weights']:
+            self.load_checkpoint('eg')
+            self.load_checkpoint('ed')
+            self.load_checkpoint('ig')
+            self.load_checkpoint('id')
+        else:
+            for d in os.listdir(model_config['model_ckpoint_dir']):
+                curr_d = os.path.join(model_config['model_ckpoint_dir'], d)
+                for f in os.listdir(curr_d):
+                    os.remove(os.path.join(curr_d, f))
+            print("ignored pretrained results")
     
     def load_checkpoint(self, model):
-        if model == 'eg':
-            self.edge_generator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "eg", "weights"))
-            print("pretrained weights for edge generator loaded")
-        elif model == "ed":
-            self.edge_discriminator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "ed", "weights"))
-            print("pretrained weights for edge discriminator loaded")
-        elif model == "ig":
-            self.inpainting_generator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "ig", "weights"))
-            print("pretrained weights for inpainting generator loaded")
-        elif model == 'id':
-            self.inpainting_discriminator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "id", "weights"))
-            print("pretrained weights for inpainting discriminator loaded")
+        try:
+            if model == 'eg':
+                self.edge_generator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "eg", "weights"))
+                print("pretrained weights for edge generator loaded")
+            elif model == "ed":
+                self.edge_discriminator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "ed", "weights"))
+                print("pretrained weights for edge discriminator loaded")
+            elif model == "ig":
+                self.inpainting_generator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "ig", "weights"))
+                print("pretrained weights for inpainting generator loaded")
+            elif model == 'id':
+                self.inpainting_discriminator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "id", "weights"))
+                print("pretrained weights for inpainting discriminator loaded")
+        except:
+            print("weight loading failed for {}".format(model))
 
     def check_pointing_edge_models(self):
         self.edge_generator.save_weights(os.path.join(self.config['model_ckpoint_dir'], "eg", "weights"))

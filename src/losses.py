@@ -6,35 +6,42 @@ from tensorflow.keras import layers
 class EdgeDiscriminator(keras.Model):
     def __init__(self, **kwargs):
         super(EdgeDiscriminator, self).__init__(**kwargs)
-
-    def build(self, input_shape):
-        img_shape = input_shape[1:]
-        input_x = keras.Input((img_shape[0], img_shape[1], img_shape[2]))
-        input_y = keras.Input((img_shape[0], img_shape[1], img_shape[2]))
-        curr_x = input_x
-        curr_y = input_y
-        FMLoss = 0
         conv_sz = [16, 32, 64, 64]
-        for i, sz in enumerate(conv_sz):
-            curr_layer = keras.Sequential((layers.Conv2D(filters=sz, kernel_size=[4,4], strides=[2,2], padding='same', use_bias=True, name="conv{}".format(i)), layers.LeakyReLU(0.2)))
-            curr_x = curr_layer(curr_x)
-            curr_y = curr_layer(curr_y)
-            FMLoss += tf.reduce_mean(tf.abs(curr_x - curr_y))
-        FMLoss /= 4.0
+        self.convs = [
+            keras.Sequential((
+                layers.Conv2D(
+                    filters=sz,
+                    kernel_size=[4,4],
+                    strides=[2,2],
+                    padding='same',
+                    use_bias=True,
+                    name="conv{}".format(i)
+                ),
+                layers.LeakyReLU(0.2)
+            ))
+            for i, sz in enumerate(conv_sz)
+        ]
 
-        flatten_layer = layers.Flatten()
-        curr_x = flatten_layer(curr_x)
-        dense_layer = layers.Dense(units=1, use_bias=True, name='fc')
-        result_x = dense_layer(curr_x)
-
-        self.LFM = keras.Model(inputs=(input_x, input_y), outputs=FMLoss, name="Lfm")
-        self.pred_logit = keras.Model(inputs=input_x, outputs=result_x, name='pred_logit')
+        self.post_process = keras.Sequential((
+            layers.Flatten(),
+            layers.Dense(units=1, use_bias=True, name='fc')
+        ))
     
+    def pred_logit(self, img):
+        for conv in self.convs:
+            img = conv(img)
+        return self.post_process(img)
+
+    def feature_matching_loss(self, imga, imgb):
+        loss = 0
+        for conv in self.convs:
+            imga = conv(imga)
+            imgb = conv(imgb)
+            loss += tf.reduce_mean(tf.abs(imga - imgb))
+        return loss / 4.0
+
     def call(self, img):
         return tf.nn.sigmoid(self.pred_logit(img))
-    
-    def feature_matching_loss(self, imga, imgb):
-        return self.LFM(imga, imgb)
     
     def generator_loss(self, fake_img, true_img):
         fake_logit = self.pred_logit(fake_img)
@@ -45,7 +52,7 @@ class EdgeDiscriminator(keras.Model):
                    tf.reduce_mean(
                            tf.nn.sigmoid_cross_entropy_with_logits(
                            tf.ones(tf.shape(fake_logit)), fake_logit))
-        FMLoss = self.LFM((fake_img, true_img))
+        FMLoss = self.feature_matching_loss(fake_img, true_img)
         return gen_loss, FMLoss
 
     def discriminator_loss(self, fake_img, true_img):
