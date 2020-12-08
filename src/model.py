@@ -61,7 +61,11 @@ class InpaitingModel:
         self.inpainting_discriminator.save_weights(os.path.join(self.config['model_ckpoint_dir'], "id", "weights"))
     
     @tf.function
-    def edge_train_step(self, masked_gray_img, edge, mask):
+    def edge_train_step(self, gray_img, edge, mask):
+        gray_img = tf.cast(gray_img, tf.float32) / 127.5 - 1
+        edge = tf.cast(edge, tf.float32)
+        mask = tf.cast(mask, tf.float32)
+        masked_gray_img = mask * gray_img
         masked_edge = mask * edge
         with tf.GradientTape(persistent=True) as tape:
             fake_edge = self.edge_generator(masked_gray_img, masked_edge, mask)
@@ -79,6 +83,9 @@ class InpaitingModel:
  
     @tf.function
     def inpainting_train_step(self, edge, clr_img, mask):
+        edge = tf.cast(edge, tf.float32)
+        clr_img = tf.cast(clr_img, tf.float32) / 127.5 - 1
+        mask = tf.cast(mask, tf.float32)
         masked_clr = mask * clr_img
         with tf.GradientTape(persistent=True) as tape:
             fake_clr = self.inpainting_generator(edge, masked_clr, mask)
@@ -99,16 +106,21 @@ class InpaitingModel:
         self.id_opt.apply_gradients(zip(disc_grad, self.inpainting_discriminator.trainable_variables))
     
     @tf.function
-    def infer_edge(self, clr_img, edge, mask):
-        grey_img = tf.image.rgb_to_grayscale(clr_img)
-        masked_grey = grey_img * mask
+    def infer_edge(self, gray_img, edge, mask):
+        gray_img = tf.cast(gray_img, tf.float32)
+        edge = tf.cast(edge, tf.float32)
+        mask = tf.cast(mask, tf.float32)
+        masked_gray = gray_img * mask
         masked_edge = edge * mask
-        return self.edge_generator(masked_grey, masked_edge, mask)
+        return tf.cast(self.edge_generator(masked_gray, masked_edge, mask) > 0.5, tf.uint8)
     
     @tf.function
     def infer_inpainting(self, clr_img, edge, mask):
+        clr_img = tf.cast(clr_img, tf.float32)
+        edge = tf.cast(edge, tf.float32)
+        mask = tf.cast(mask, tf.float32)
         masked_clr = clr_img * mask
-        return self.inpainting_generator(edge, masked_clr, mask)
+        return tf.cast((self.inpainting_generator(edge, masked_clr, mask) + 1) * 127.5, tf.uint8)
     
     @tf.function
     def fused_infer(self, clr_img, edge, mask):
