@@ -132,7 +132,7 @@ class InpaitingModel:
             print("trainning for epoch {}/{}".format(e, epochs))
             for i, (masked_gray, edge, mask) in enumerate(edge_dataset):
                 if not self.ed_built:
-                    self.edge_discriminator(edge)
+                    self.edge_discriminator(tf.cast(edge, tf.float32))
                     self.ed_built = True
                 self.edge_train_step(masked_gray, edge, mask)
                 if i % ckpoint_step == 0:
@@ -147,7 +147,7 @@ class InpaitingModel:
             print("trainning for epoch {}/{}".format(e, epochs))
             for i, (edge, clr_img, mask) in enumerate(clr_dataset):
                 if not self.id_built:
-                    self.inpainting_discriminator(clr_img)
+                    self.inpainting_discriminator(tf.cast(clr_img, tf.float32))
                     self.id_built = True
                 self.inpainting_train_step(edge, clr_img, mask)
                 if i % ckpoint_step == 0:
