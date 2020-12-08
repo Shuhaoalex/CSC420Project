@@ -88,8 +88,7 @@ class InpaitingModel:
                 self.config["clr"]["lamb_perc"],
                 self.config["clr"]["lamb_style"])
             l1_loss = reconstruction_loss(fake_clr, clr_img)
-            gen_loss = self.config["clr"]["lamb_l1"] * l1_loss +\
-                    self.config["clr"]["lamb_adv"] * adv_loss + psl
+            gen_loss = self.config["clr"]["lamb_l1"] * l1_loss + self.config["clr"]["lamb_adv"] * adv_loss + psl
             disc_loss = self.inpainting_discriminator.discriminator_loss(fake_clr, clr_img)
         
         gen_grad = tape.gradient(gen_loss, self.inpainting_generator.trainable_variables)
