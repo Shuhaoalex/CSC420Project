@@ -142,13 +142,17 @@ class InpaitingModel:
                     if not os.path.exists(img_out_dir):
                         os.mkdir(img_out_dir)
                     for i in range(3):
-                        cv2.imwrite(os.path.join(img_out_dir, "gray{}.png".format(i)), gray[:,:,0].numpy())
-                        edge_img = np.empty(edge.shape[:2] + (3,), dtype=np.uint8)
-                        edge_img[:,:,1] = edge
-                        edge_img[:,:,2] = self.infer_edge(gray, edge, mask)
-                        edge_img[:,:,0] = edge * mask
+                        curr_gray = gray[i][None,...]
+                        curr_edge = edge[i][None,...]
+                        curr_mask = mask[i][None,...]
+                        infered_edge = self.infer_edge(curr_gray, curr_edge, curr_mask)[0,:,:,0]
+                        cv2.imwrite(os.path.join(img_out_dir, "gray{}.png".format(i)), curr_gray[0,:,:,0].numpy())
+                        edge_img = np.empty((edge.shape[1], edge.shape[2], 3), dtype=np.uint8)
+                        edge_img[:,:,1] = curr_edge[0]
+                        edge_img[:,:,2] = infered_edge[0]
+                        edge_img[:,:,0] = curr_edge[0] * curr_mask[0]
                         cv2.imwrite(os.path.join(img_out_dir, "edge{}.png".format(i)).format(i), edge_img)
-                        cv2.imwrite(os.path.join(img_out_dir, "mask{}.png".format(i)).format(i), mask[:,:,0].numpy())
+                        cv2.imwrite(os.path.join(img_out_dir, "mask{}.png".format(i)).format(i), curr_mask[0,:,:,0].numpy())
                 if element_per_epoch is not None and (i % (element_per_epoch//100) == 0):
                     print("{}/{}".format(i, element_per_epoch))
             self.check_pointing_edge_models()
@@ -168,10 +172,13 @@ class InpaitingModel:
                     if not os.path.exists(img_out_dir):
                         os.mkdir(img_out_dir)
                     for i in range(3):
-                        cv2.imwrite(os.path.join(img_out_dir, "original{}.png".format(i)), clr_img.numpy())
-                        inpainting_result = self.infer_inpainting(clr_img, edge, mask)
+                        curr_edge = edge[i][None,...]
+                        curr_clr = clr_img[i][None,...]
+                        curr_mask = mask[i][None,...]
+                        cv2.imwrite(os.path.join(img_out_dir, "original{}.png".format(i)), curr_clr[0,:,:,0].numpy())
+                        inpainting_result = self.infer_inpainting(curr_clr, curr_edge, curr_mask)[0]
                         cv2.imwrite(os.path.join(img_out_dir, "inpainted{}.png".format(i)), inpainting_result.numpy())
-                        cv2.imwrite(os.path.join(img_out_dir, "mask{}.png".format(i)).format(i), mask[:,:,0].numpy())
+                        cv2.imwrite(os.path.join(img_out_dir, "mask{}.png".format(i)).format(i), curr_mask[0,:,:,0].numpy())
                 if element_per_epoch is not None and (i % (element_per_epoch//100) == 0):
                     print("{}/{}".format(i, element_per_epoch))
             self.check_pointing_inpainting_models()
