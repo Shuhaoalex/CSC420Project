@@ -43,7 +43,7 @@ class EdgeDiscriminator(keras.Model):
     def call(self, img):
         return tf.nn.sigmoid(self.pred_logit(img))
     
-    def generator_loss(self, fake_img, true_img):
+    def generator_loss(self, fake_img, true_img, lamb_adv=1.0, lamb_fm=10.0):
         fake_logit = self.pred_logit(fake_img)
         true_logit = self.pred_logit(true_img)
         gen_loss = tf.reduce_mean(
@@ -53,7 +53,7 @@ class EdgeDiscriminator(keras.Model):
                            tf.nn.sigmoid_cross_entropy_with_logits(
                            tf.ones(tf.shape(fake_logit)), fake_logit))
         FMLoss = self.feature_matching_loss(fake_img, true_img)
-        return gen_loss, FMLoss
+        return gen_loss * lamb_adv + FMLoss * lamb_fm
 
     def discriminator_loss(self, fake_img, true_img):
         fake_logit = self.pred_logit(fake_img)
@@ -121,7 +121,7 @@ class PerceptuaAndStylelLoss(keras.Model):
         x_T = tf.transpose(x, perm=(0,2,1))
         return tf.matmul(x_T, x) / (shape[1] * shape[2] * shape[3])
 
-    def call(self, fake_img, real_img):
+    def call(self, fake_img, real_img, lamb_p, lamb_s):
         means = -tf.constant([103.939, 116.779, 123.68])
         pre_processed_fake = tf.nn.bias_add((fake_img + 1) * 127.5, means)
         pre_processed_real = tf.nn.bias_add((real_img + 1) * 127.5, means)
@@ -139,7 +139,7 @@ class PerceptuaAndStylelLoss(keras.Model):
             covb = self.compute_gram(bf)
             SL += tf.reduce_mean(tf.abs(cova - covb))
         SL /= 4
-        return PL, SL
+        return PL * lamb_p + SL * lamb_s
 
 
 def reconstruction_loss(fake_img, true_img):

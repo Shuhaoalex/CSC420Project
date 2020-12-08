@@ -65,8 +65,10 @@ class InpaitingModel:
         masked_edge = mask * edge
         with tf.GradientTape(persistent=True) as tape:
             fake_edge = self.edge_generator(masked_gray_img, masked_edge, mask)
-            adv_loss, lfm = self.edge_discriminator.generator_loss(fake_edge, edge)
-            gen_loss = self.config["edge"]["lamb_adv"] * adv_loss + self.config["edge"]["lamb_fm"] * lfm
+            gen_loss = self.edge_discriminator.generator_loss(
+                fake_edge, edge,
+                self.config["edge"]["lamb_adv"],
+                self.config["edge"]["lamb_fm"])
             disc_loss = self.edge_discriminator.discriminator_loss(fake_edge, edge)
         
         gen_grad = tape.gradient(gen_loss, self.edge_generator.trainable_variables)
@@ -81,12 +83,13 @@ class InpaitingModel:
         with tf.GradientTape(persistent=True) as tape:
             fake_clr = self.inpainting_generator(edge, masked_clr, mask)
             adv_loss = self.inpainting_discriminator.generator_loss(fake_clr, clr_img)
-            perc_loss, style_loss = self.perceptual_and_style_loss(fake_clr, clr_img)
+            psl = self.perceptual_and_style_loss(
+                fake_clr, clr_img,
+                self.config["clr"]["lamb_perc"],
+                self.config["clr"]["lamb_style"])
             l1_loss = reconstruction_loss(fake_clr, clr_img)
             gen_loss = self.config["clr"]["lamb_l1"] * l1_loss +\
-                    self.config["clr"]["lamb_adv"] * adv_loss +\
-                    self.config["clr"]["lamb_perc"] * perc_loss +\
-                    self.config["clr"]["lamb_style"] * style_loss
+                    self.config["clr"]["lamb_adv"] * adv_loss + psl
             disc_loss = self.inpainting_discriminator.discriminator_loss(fake_clr, clr_img)
         
         gen_grad = tape.gradient(gen_loss, self.inpainting_generator.trainable_variables)
