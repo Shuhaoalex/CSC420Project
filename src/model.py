@@ -148,9 +148,9 @@ class InpaitingModel:
                         infered_edge = self.infer_edge(curr_gray, curr_edge, curr_mask)[0,:,:,0]
                         cv2.imwrite(os.path.join(img_out_dir, "gray{}.png".format(i)), curr_gray[0,:,:,0].numpy())
                         edge_img = np.empty((edge.shape[1], edge.shape[2], 3), dtype=np.uint8)
-                        edge_img[:,:,1] = curr_edge[0]
-                        edge_img[:,:,2] = infered_edge[0]
-                        edge_img[:,:,0] = curr_edge[0] * curr_mask[0]
+                        edge_img[:,:,1] = curr_edge[0,:,:,0]
+                        edge_img[:,:,2] = infered_edge[0,:,:,0]
+                        edge_img[:,:,0] = curr_edge[0,:,:,0] * curr_mask[0,:,:,0]
                         cv2.imwrite(os.path.join(img_out_dir, "edge{}.png".format(i)).format(i), edge_img)
                         cv2.imwrite(os.path.join(img_out_dir, "mask{}.png".format(i)).format(i), curr_mask[0,:,:,0].numpy())
                 if element_per_epoch is not None and (i % (element_per_epoch//100) == 0):
