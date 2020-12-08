@@ -2,6 +2,7 @@ import tensorflow as tf
 from model_building_blocks import *
 from losses import *
 import os
+import cv2
 
 class InpaitingModel:
     def __init__(self, model_config):
