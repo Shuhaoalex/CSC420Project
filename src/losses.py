@@ -45,14 +45,15 @@ class EdgeDiscriminator(keras.Model):
     def generator_loss(self, fake_img, true_img, lamb_adv=1.0, lamb_fm=10.0):
         fake_logit = self.pred_logit(fake_img)
         true_logit = self.pred_logit(true_img)
-        gen_loss = tf.reduce_mean(
+        adv_loss1 = tf.reduce_mean(
                            tf.nn.sigmoid_cross_entropy_with_logits(
-                           tf.zeros(tf.shape(true_logit)), true_logit)) +\
-                   tf.reduce_mean(
+                           tf.zeros(tf.shape(true_logit)), true_logit))
+        adv_loss2 = tf.reduce_mean(
                            tf.nn.sigmoid_cross_entropy_with_logits(
                            tf.ones(tf.shape(fake_logit)), fake_logit))
         FMLoss = self.feature_matching_loss(fake_img, true_img)
-        return gen_loss * lamb_adv + FMLoss * lamb_fm
+        result = FMLoss * lamb_fm + (adv_loss1 + adv_loss2) * lamb_adv
+        return result
 
     def discriminator_loss(self, fake_img, true_img):
         fake_logit = self.pred_logit(fake_img)
@@ -87,13 +88,12 @@ class InpaintingDiscriminator(keras.Model):
     def generator_loss(self, fake_img, true_img):
         fake_logit = self.model(fake_img)
         true_logit = self.model(true_img)
-        gen_loss = tf.reduce_mean(
+        return tf.reduce_mean(
                            tf.nn.sigmoid_cross_entropy_with_logits(
                            tf.zeros(tf.shape(true_logit)), true_logit)) +\
-                   tf.reduce_mean(
-                           tf.nn.sigmoid_cross_entropy_with_logits(
-                           tf.ones(tf.shape(fake_logit)), fake_logit))
-        return gen_loss
+                tf.reduce_mean(
+                        tf.nn.sigmoid_cross_entropy_with_logits(
+                        tf.ones(tf.shape(fake_logit)), fake_logit))
 
     def discriminator_loss(self, fake_img, true_img):
         fake_logit = self.model(fake_img)
