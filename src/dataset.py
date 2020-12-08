@@ -9,15 +9,12 @@ from canny import canny
 from skimage.feature import canny as ski_canny
 
 class Dataset(object):
-    def __init__(self, config, img_list, mask_list, mode):
+    def __init__(self, config, img_list, mask_list):
         super(Dataset, self).__init__()
 
         # image list and mask list
         self.img_list = self.load_flist(img_list)
         self.mask_list = self.load_flist(mask_list)
-
-        # type of dataset: either train, test, or validation
-        self.mode = mode
         
         # read parameter values from the config file
         self.input_size = config["input_size"]
@@ -74,11 +71,7 @@ class Dataset(object):
 
         # 1.2 input mask is 0(black) for missing foreground region and 255(white) for background
         # random select a mask for training
-        if self.mode != "test":
-            mask_idx = random.randint(0, len(self.mask_list) - 1)
-        else:
-            mask_idx = np.where(self.img_list == path)[0][0]
-
+        mask_idx = random.randint(0, self.mask_list.size - 1)
         mask = cv2.imread(self.mask_list[mask_idx])
         mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
         if mask.shape[0] != mask.shape[1]:
@@ -139,15 +132,15 @@ def construct_dataset(config, mode=None):
         mask_list = config["mask_test_flist"]
 
     if img_list and mask_list:
-        dataset = Dataset(config, img_list, mask_list, mode)
+        dataset = Dataset(config, img_list, mask_list)
         return dataset
 
 if __name__ == "__main__":
     # TODO: should initialize all variables to a config file
-    config = {"img_train_flist":"../datasets/celeba_train.flist", \
+    config = {"img_train_flist":"../datasets/final_train.flist", \
         "img_test_flist":"../datasets/celeba_test.flist", \
             "img_validation_flist":"../datasets/celeba_validation.flist", \
-                "mask_train_flist":"../datasets/mask_train.flist", \
+                "mask_train_flist":"../datasets/final_mask_train.flist", \
                     "mask_validation_flist":"../datasets/mask_validation.flist", \
                         "mask_test_flist":"../datasets/mask_test.flist", \
                             "sigma":2, "input_size":256}
@@ -157,5 +150,4 @@ if __name__ == "__main__":
     dataset = construct_dataset(config, mode="train")
     edge_dataset = dataset.get_edge_dataset()
     color_dataset = dataset.get_color_dataset()
-
     size = dataset.get_size()

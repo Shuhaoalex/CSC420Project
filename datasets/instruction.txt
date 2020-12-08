@@ -1,20 +1,25 @@
 Under ./datasets/.. folder
 folder structure could be like:
 --datasets
-------Places2_celeba
-----------train
+------train
+---------image
+----------------.....
+---------mask
+----------------.....
+------test
+----------image
+---------------Places
+------------------.....
+---------------Celeba
+------------------.....
+----------mask
+----------------.....
 -------------.....
-----------test
--------------.....
-----------validation
--------------.....
-------qd_imd
-----------train
--------------.....
-----------test
--------------.....
-----------validation
--------------.....
+------validation
+---------image
+----------------.....
+---------mask
+----------------.....
 
 
 1. Images
@@ -37,4 +42,6 @@ folder structure could be like:
 2. Generate flist
 Choose one image dataset and use irregular mask dataset to initialize dataset.
 You'll need a flist file which lists all file paths. Run script under /script/ to generate that flist file.
-Example use: python ./src/scripts/flist.py --path ./datasets/celeba/train/ --output ./datasets/celeba_train.flist
+Example use: 
+    1. training: python ./src/scripts/flist.py --path ./datasets/train/image/ --output ./datasets/image_train.flist
+    2. testing: python ./src/scripts/flist.py --path ./datasets/test/image/ --output ./datasets/image_test.flist --test_s-ze 10
