@@ -72,8 +72,7 @@ class Dataset(object):
         # 1.2 input mask is 0(black) for missing foreground region and 255(white) for background
         # random select a mask for training
         mask_idx = random.randint(0, self.mask_list.size - 1)
-        mask = cv2.imread(self.mask_list[mask_idx])
-        mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
+        mask = cv2.imread(self.mask_list[mask_idx], cv2.IMREAD_GRAYSCALE)
         if mask.shape[0] != mask.shape[1]:
             mask = self.crop_square_image(mask)
         mask = cv2.resize(mask, (size, size))
