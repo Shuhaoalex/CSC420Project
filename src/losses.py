@@ -118,7 +118,7 @@ class PerceptuaAndStylelLoss(keras.Model):
         shape = tf.shape(x)
         x = tf.reshape(x, (shape[0], shape[1] * shape[2], shape[3]))
         x_T = tf.transpose(x, perm=(0,2,1))
-        return tf.matmul(x_T, x) / (shape[1] * shape[2] * shape[3])
+        return tf.matmul(x_T, x) / tf.cast(tf.reduce_prod(shape[1:]), tf.float32)
 
     def call(self, fake_img, real_img, lamb_p, lamb_s):
         means = -tf.constant([103.939, 116.779, 123.68])
