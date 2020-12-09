@@ -46,7 +46,9 @@ class Dataset(object):
                 return flist
             if os.path.isfile(flist):
                 try:
-                    return np.genfromtxt(flist, dtype=np.str, encoding='utf-8')
+                    tmp = np.genfromtxt(flist, dtype=np.str, encoding='utf-8')
+                    np.random.shuffle(tmp)
+                    return tmp
                 except:
                     return [flist]
         return []
