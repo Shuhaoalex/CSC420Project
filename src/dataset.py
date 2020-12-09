@@ -83,7 +83,7 @@ class Dataset(object):
         
         # 1.3 ground truth edge without any masked regions
         # canny
-        edge_map = canny(gray_image, guassian_blur_sigma=1.0, sobel_size=3, lowThresholdRatio=0.25, highThresholdRatio=0.3) # background is 0, foreground is 1
+        edge_map = (canny(gray_image, guassian_blur_sigma=1.0, sobel_size=3, lowThresholdRatio=0.25, highThresholdRatio=0.3) > 0).astype(np.uint8)# background is 0, foreground is 1
 
         # finalize output
         # expand dimension to 3 channels
