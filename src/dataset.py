@@ -6,7 +6,6 @@ import tensorflow as tf
 import cv2
 import matplotlib.pyplot as plt
 from canny import canny
-from skimage.feature import canny as ski_canny
 
 class Dataset(object):
     def __init__(self, config, img_list, mask_list):
