@@ -6,7 +6,7 @@ from tensorflow.keras import layers
 class EdgeDiscriminator(keras.Model):
     def __init__(self, **kwargs):
         super(EdgeDiscriminator, self).__init__(**kwargs)
-        conv_sz = [16, 32, 64, 64]
+        conv_sz = [32, 64, 128, 128]
         self.convs = [
             keras.Sequential((
                 layers.Conv2D(
@@ -70,13 +70,13 @@ class InpaintingDiscriminator(keras.Model):
     def __init__(self, **kwargs):
         super(InpaintingDiscriminator, self).__init__(**kwargs)
         self.model = keras.Sequential((
-            layers.Conv2D(filters=32, kernel_size=[4,4], strides=[2,2], padding="same", use_bias=True, name="conv0"),
+            layers.Conv2D(filters=64, kernel_size=[4,4], strides=[2,2], padding="same", use_bias=True, name="conv0"),
             layers.LeakyReLU(0.2),
-            layers.Conv2D(filters=64, kernel_size=[4,4], strides=[2,2], padding="same", use_bias=True, name="conv1"),
+            layers.Conv2D(filters=128, kernel_size=[4,4], strides=[2,2], padding="same", use_bias=True, name="conv1"),
             layers.LeakyReLU(0.2),
-            layers.Conv2D(filters=128, kernel_size=[4,4], strides=[2,2], padding="same", use_bias=True, name="conv2"),
+            layers.Conv2D(filters=256, kernel_size=[4,4], strides=[2,2], padding="same", use_bias=True, name="conv2"),
             layers.LeakyReLU(0.2),
-            layers.Conv2D(filters=128, kernel_size=[4,4], strides=[2,2], padding="same", use_bias=True, name="conv3"),
+            layers.Conv2D(filters=256, kernel_size=[4,4], strides=[2,2], padding="same", use_bias=True, name="conv3"),
             layers.LeakyReLU(0.2),
             layers.Flatten(),
             layers.Dense(units=1, use_bias=True, name='fc')

@@ -105,14 +105,16 @@ class InpaitingModel:
         self.ig_opt.apply_gradients(zip(gen_grad, self.inpainting_generator.trainable_variables))
         self.id_opt.apply_gradients(zip(disc_grad, self.inpainting_discriminator.trainable_variables))
     
-    @tf.function
+    # @tf.function
     def infer_edge(self, gray_img, edge, mask):
         gray_img = tf.cast(gray_img, tf.float32) / 127.5 - 1.0
         edge = tf.cast(edge, tf.float32)
         mask = tf.cast(mask, tf.float32)
         masked_gray = gray_img * mask
         masked_edge = edge * mask
-        return tf.cast(self.edge_generator(masked_gray, masked_edge, mask) > 0.5, tf.uint8)
+        tmp = self.edge_generator(masked_gray, masked_edge, mask)
+        print("infer_range: ", tf.reduce_min(tmp), tf.reduce_max(tmp))
+        return tf.cast(tmp * 255, tf.uint8)
     
     @tf.function
     def infer_inpainting(self, clr_img, edge, mask):
@@ -148,11 +150,12 @@ class InpaitingModel:
                         infered_edge = self.infer_edge(curr_gray, curr_edge, curr_mask)[0,:,:,0]
                         cv2.imwrite(os.path.join(img_out_dir, "gray{}.png".format(i)), curr_gray[0,:,:,0].numpy())
                         edge_img = np.empty((edge.shape[1], edge.shape[2], 3), dtype=np.uint8)
-                        edge_img[:,:,1] = curr_edge[0,:,:,0]
+                        edge_img[:,:,1] = curr_edge[0,:,:,0] * 255
                         edge_img[:,:,2] = infered_edge
-                        edge_img[:,:,0] = curr_edge[0,:,:,0] * curr_mask[0,:,:,0]
+                        edge_img[:,:,0] = curr_edge[0,:,:,0] * curr_mask[0,:,:,0] * 255
                         cv2.imwrite(os.path.join(img_out_dir, "edge{}.png".format(i)).format(i), edge_img)
                         cv2.imwrite(os.path.join(img_out_dir, "mask{}.png".format(i)).format(i), curr_mask[0,:,:,0].numpy() * 255)
+                    return
                 if element_per_epoch is not None and (i % (element_per_epoch//100) == 0):
                     print("{}/{}".format(i, element_per_epoch))
             self.check_pointing_edge_models()

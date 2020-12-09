@@ -1,11 +1,13 @@
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
+import tensorflow_addons as tfa
 import numpy as np
 
 class GatedConv2d(layers.Layer):
     def __init__(self, filter_number, ksize=(3,3), strides=(1,1), dilation_rate=(1,1), **kwargs):
         super(GatedConv2d, self).__init__(**kwargs)
+        #initializer = tf.keras.initializers.RandomNormal(mean=0., stddev=1.)
         self.conv = layers.Conv2D(
             filter_number * 2,
             kernel_size=ksize,
@@ -13,14 +15,25 @@ class GatedConv2d(layers.Layer):
             padding="same",
             dilation_rate=dilation_rate,
             use_bias=True,
-            activation=None)
+            activation=None
+            #kernel_initializer=initializer
+            )
+        self.inl = tfa.layers.InstanceNormalization(
+            axis=3,
+            center=True,
+            scale=True,
+            beta_initializer="random_uniform",
+            gamma_initializer="random_uniform")
 
     def call(self, prev):
         convolved = self.conv(prev)
         gating, feature = tf.split(convolved, 2, 3)
-        activate_feature = tf.nn.elu(feature)
+        normalized_feature = self.inl(feature)
+        activate_feature = tf.nn.elu(normalized_feature)
         smooth_gating = tf.nn.sigmoid(gating)
-        return activate_feature * smooth_gating
+        result = activate_feature * smooth_gating
+        print(tf.reduce_min(result), tf.reduce_max(result))
+        return result
 
 
 class GatedDeconv2d(layers.Layer):
@@ -34,13 +47,22 @@ class GatedDeconv2d(layers.Layer):
             dilation_rate=dilation_rate,
             use_bias=True,
             activation=None)
+        self.inl = tfa.layers.InstanceNormalization(
+            axis=3,
+            center=True,
+            scale=True,
+            beta_initializer="random_uniform",
+            gamma_initializer="random_uniform")
     
     def call(self, prev):
         convolved = self.conv(prev)
         gating, feature = tf.split(convolved, 2, 3)
-        activate_feature = tf.nn.elu(feature)
+        normalized_feature = self.inl(feature)
+        activate_feature = tf.nn.elu(normalized_feature)
         smooth_gating = tf.nn.sigmoid(gating)
-        return activate_feature * smooth_gating
+        result = activate_feature * smooth_gating
+        print(tf.reduce_min(result), tf.reduce_max(result))
+        return result
 
 
 class GatedConvGenerator(keras.Model):
@@ -89,7 +111,8 @@ class GatedConvGenerator(keras.Model):
                         dilation_rate=c.get("d_factor", (1,1)),
                         use_bias=True,
                         activation=None,
-                        name=c.get("name", "conv{}".format(i))
+                        name=c.get("name", "conv{}".format(i)),
+                        kernel_initializer=keras.initializers.RandomNormal(mean=0.0, stddev=1.0)
                     )
                 )
             else:
@@ -102,7 +125,8 @@ class GatedConvGenerator(keras.Model):
                         dilation_rate=c.get("d_factor", (1,1)),
                         use_bias=True,
                         activation=None,
-                        name=c.get("name", "conv{}".format(i))
+                        name=c.get("name", "conv{}".format(i)),
+                        kernel_initializer=keras.initializers.RandomNormal(mean=0.0, stddev=1.0)
                     )
                 )
         
@@ -118,7 +142,10 @@ class EdgeGenerator(keras.Model):
     def call(self, masked_gray, masked_edge, mask):
         inp = tf.concat((masked_gray, masked_edge, mask), axis=3)
         raw_pred = tf.sigmoid(self.model(inp))
-        return raw_pred * (1-mask) + masked_edge
+        print("eg_range: ", tf.reduce_min(raw_pred), tf.reduce_max(raw_pred))
+        #return raw_pred * (1-mask) + masked_edge
+        #print(tf.reduce_min(raw_pred), tf.reduce_max(raw_pred))
+        return raw_pred
 
 
 class InpaitingGenerator(keras.Model):
@@ -129,4 +156,5 @@ class InpaitingGenerator(keras.Model):
     def call(self, edge, masked_clr, mask):
         inp = tf.concat((edge, masked_clr, mask), axis=3)
         raw_pred = tf.tanh(self.model(inp))
-        return raw_pred * (1-mask) + masked_clr
+        #return raw_pred * (1-mask) + masked_clr
+        return raw_pred
