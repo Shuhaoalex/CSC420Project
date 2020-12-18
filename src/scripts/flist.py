@@ -1,3 +1,6 @@
+# script flist.py is modified from below github reference link
+# Reference link: https://github.com/knazeri/edge-connect/blob/master/scripts/flist.py
+
 import os
 import argparse
 import numpy as np
