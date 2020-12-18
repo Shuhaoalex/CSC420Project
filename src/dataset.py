@@ -34,7 +34,7 @@ class Dataset(object):
     def get_size(self):
         return self.size
 
-    # function load_flist is modified from below github reference link
+    # function load_flist is modified from below github link
     # Reference link: https://github.com/knazeri/edge-connect
     def load_flist(self, flist):
         if isinstance(flist, list):
