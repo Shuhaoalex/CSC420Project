@@ -6,7 +6,7 @@ from tensorflow.keras import layers
 class EdgeDiscriminator(keras.Model):
     def __init__(self, **kwargs):
         super(EdgeDiscriminator, self).__init__(**kwargs)
-        conv_sz = [32, 64, 128, 128]
+        conv_sz = [64, 128, 256, 256]
         self.convs = [
             keras.Sequential((
                 layers.Conv2D(
@@ -31,33 +31,32 @@ class EdgeDiscriminator(keras.Model):
             img = conv(img)
         return self.post_process(img)
 
-    def feature_matching_loss(self, imga, imgb):
+    def feature_matching_loss(self, imga, imgb, scale_factor):
         loss = 0
         for conv in self.convs:
             imga = conv(imga)
             imgb = conv(imgb)
             loss += tf.reduce_mean(tf.abs(imga - imgb))
+            # tmp = tf.reduce_mean(tf.abs(imga - imgb), axis=(1,2,3)) * scale_factor
+            # loss += tf.reduce_mean(tmp)
         return loss / 4.0
 
     def call(self, img):
         return tf.nn.sigmoid(self.pred_logit(img))
     
-    def generator_loss(self, fake_img, true_img, lamb_adv=1.0, lamb_fm=10.0):
+    def generator_loss(self, fake_img, true_img, lamb_adv, lamb_fm, scale_factors):
         fake_logit = self.pred_logit(fake_img)
-        true_logit = self.pred_logit(true_img)
-        adv_loss1 = tf.reduce_mean(
-                           tf.nn.sigmoid_cross_entropy_with_logits(
-                           tf.zeros(tf.shape(true_logit)), true_logit))
-        adv_loss2 = tf.reduce_mean(
+        adv_loss = tf.reduce_mean(
                            tf.nn.sigmoid_cross_entropy_with_logits(
                            tf.ones(tf.shape(fake_logit)), fake_logit))
-        FMLoss = self.feature_matching_loss(fake_img, true_img)
-        result = FMLoss * lamb_fm + (adv_loss1 + adv_loss2) * lamb_adv
+        FMLoss = self.feature_matching_loss(fake_img, true_img, scale_factors)
+        result = FMLoss * lamb_fm + adv_loss * lamb_adv
         return result
 
     def discriminator_loss(self, fake_img, true_img):
         fake_logit = self.pred_logit(fake_img)
-        true_logit = self.pred_logit(true_img)
+        mask = tf.abs(tf.random.truncated_normal(tf.shape(true_img), stddev=0.1))
+        true_logit = self.pred_logit(tf.abs(true_img - mask))
         return tf.reduce_mean(
                     tf.nn.sigmoid_cross_entropy_with_logits(
                         tf.ones(tf.shape(true_logit)), true_logit)) +\
@@ -87,11 +86,7 @@ class InpaintingDiscriminator(keras.Model):
     
     def generator_loss(self, fake_img, true_img):
         fake_logit = self.model(fake_img)
-        true_logit = self.model(true_img)
         return tf.reduce_mean(
-                           tf.nn.sigmoid_cross_entropy_with_logits(
-                           tf.zeros(tf.shape(true_logit)), true_logit)) +\
-                tf.reduce_mean(
                         tf.nn.sigmoid_cross_entropy_with_logits(
                         tf.ones(tf.shape(fake_logit)), fake_logit))
 
@@ -122,7 +117,7 @@ class PerceptuaAndStylelLoss(keras.Model):
         x_T = tf.transpose(x, perm=(0,2,1))
         return tf.matmul(x_T, x) / tf.cast(tf.reduce_prod(shape[1:]), tf.float32)
 
-    def call(self, fake_img, real_img, lamb_p, lamb_s):
+    def call(self, fake_img, real_img, lamb_p, lamb_s, scale_factor):
         means = -tf.constant([103.939, 116.779, 123.68])
         pre_processed_fake = tf.nn.bias_add((fake_img + 1) * 127.5, means)
         pre_processed_real = tf.nn.bias_add((real_img + 1) * 127.5, means)
@@ -131,7 +126,9 @@ class PerceptuaAndStylelLoss(keras.Model):
 
         PL = 0
         for af, bf in zip(a_pf, b_pf):
-            PL += tf.reduce_mean(tf.abs(af - bf))
+            # PL = tf.reduce_mean(tf.abs(af - bf))
+            tmp = tf.reduce_mean(tf.abs(af - bf), axis=(1,2,3)) * scale_factor
+            PL += tf.reduce_mean(tmp)
         PL /= 5
 
         SL = 0
@@ -155,3 +152,4 @@ if __name__ == "__main__":
     # print(result)
     # keras.utils.plot_model(a.LFM, "LFM.png")
     # keras.utils.plot_model(a.Ladv, "Ladv.png")
+

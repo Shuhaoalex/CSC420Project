@@ -3,59 +3,67 @@
         "edge": {
             "lamb_adv": 1,
             "lamb_fm": 10,
-            "generator" : [
-                {"mode":"gconv", "chnl": 8, "ksize":[5,5], "name":"conv1"},
-                {"mode":"gconv", "chnl": 16, "stride":[2,2], "name":"conv2_downsample"},
-                {"mode":"gconv", "chnl": 16, "name":"conv3"},
-                {"mode":"gconv", "chnl": 32, "stride":[2,2], "name":"conv4_downsample"},
-                {"mode":"gconv", "chnl": 32, "name":"conv5"},
-                {"mode":"gconv", "chnl": 32, "d_factor":[2,2], "name":"conv6_astrous"},
-                {"mode":"gconv", "chnl": 32, "d_factor":[4,4], "name":"conv7_astrous"},
-                {"mode":"gconv", "chnl": 32, "name":"conv10"},
-                {"mode":"gdeconv", "chnl": 16, "name":"conv11_upsample"},
-                {"mode":"gconv", "chnl": 16, "name":"conv12"},
-                {"mode":"gdeconv", "chnl": 8, "name":"conv13_upsample"},
-                {"mode":"conv", "chnl": 1, "name":"conv14"}
-            ],
-            "train": false,
-            "train_epoch": 3,
-            "ckpoint_step": 500
+            "generator": {
+                "layers": [
+                    {"mode":"gconv", "chnl": 16, "ksize":[5,5], "name":"conv1"},
+                    {"mode":"gconv", "chnl": 32, "stride":[2,2], "name":"conv2_downsample"},
+                    {"mode":"gconv", "chnl": 32, "name":"conv3"},
+                    {"mode":"gconv", "chnl": 64, "stride":[2,2], "name":"conv4_downsample"},
+                    {"mode":"gconv", "chnl": 64, "name":"conv5", "res":true},
+                    {"mode":"gconv", "chnl": 64, "d_factor":[2,2], "name":"conv6_astrous", "res":true},
+                    {"mode":"gconv", "chnl": 64, "d_factor":[4,4], "name":"conv7_astrous", "res":true},
+                    {"mode":"gconv", "chnl": 64, "name":"conv10", "res":true},
+                    {"mode":"gdeconv", "chnl": 32, "name":"conv11_upsample"},
+                    {"mode":"gconv", "chnl": 32, "name":"conv12"},
+                    {"mode":"gdeconv", "chnl": 16, "name":"conv13_upsample"},
+                    {"mode":"gconv", "chnl": 16, "name":"conv14"},
+                    {"mode":"conv", "chnl": 1, "name":"conv15"}
+                ],
+                "jump_connection": [-1,-1,-1,-1,-1,-1,-1,-1,2,-1,0,-1,-1]
+            },
+            "train": true,
+            "train_epoch": 30,
+            "ckpoint_step": 50
         },
         "clr": {
             "lamb_l1": 1,
             "lamb_adv": 0.1,
             "lamb_perc": 0.1,
             "lamb_style": 250,
-            "generator": [
-                {"mode":"gconv", "chnl": 16, "ksize":[5,5], "name":"conv1"},
-                {"mode":"gconv", "chnl": 32, "stride":[2,2], "name":"conv2_downsample"},
-                {"mode":"gconv", "chnl": 32, "name":"conv3"},
-                {"mode":"gconv", "chnl": 64, "stride":[2,2], "name":"conv4_downsample"},
-                {"mode":"gconv", "chnl": 64, "name":"conv5"},
-                {"mode":"gconv", "chnl": 64, "d_factor":[2,2], "name":"conv6_astrous"},
-                {"mode":"gconv", "chnl": 64, "d_factor":[4,4], "name":"conv7_astrous"},
-                {"mode":"gconv", "chnl": 64, "d_factor":[8,8], "name":"conv8_astrous"},
-                {"mode":"gconv", "chnl": 64, "d_factor":[16,16], "name":"conv9_astrous"},
-                {"mode":"gconv", "chnl": 64, "name":"conv10"},
-                {"mode":"gdeconv", "chnl":32, "name":"conv11_upsample"},
-                {"mode":"gconv", "chnl": 32, "name":"conv12"},
-                {"mode":"gdeconv", "chnl": 16, "name":"conv13_upsample"},
-                {"mode":"conv", "chnl": 3, "name":"conv14"}
-            ],
-            "train": false,
-            "train_epoch" : 3,
-            "ckpoint_step": 500
+            "generator": {
+                "layers": [
+                    {"mode":"gconv", "chnl": 16, "ksize":[5,5], "name":"conv1"},
+                    {"mode":"gconv", "chnl": 32, "stride":[2,2], "name":"conv2_downsample"},
+                    {"mode":"gconv", "chnl": 32, "name":"conv3"},
+                    {"mode":"gconv", "chnl": 64, "stride":[2,2], "name":"conv4_downsample"},
+                    {"mode":"gconv", "chnl": 64, "name":"conv5", "res":true},
+                    {"mode":"gconv", "chnl": 64, "d_factor":[2,2], "name":"conv6_astrous", "res":true},
+                    {"mode":"gconv", "chnl": 64, "d_factor":[4,4], "name":"conv7_astrous", "res":true},
+                    {"mode":"gconv", "chnl": 64, "d_factor":[8,8], "name":"conv8_astrous", "res":true},
+                    {"mode":"gconv", "chnl": 64, "d_factor":[16,16], "name":"conv9_astrous", "res":true},
+                    {"mode":"gconv", "chnl": 64, "name":"conv10", "res":true},
+                    {"mode":"gdeconv", "chnl":32, "name":"conv11_upsample"},
+                    {"mode":"gconv", "chnl": 32, "name":"conv12"},
+                    {"mode":"gdeconv", "chnl": 16, "name":"conv13_upsample"},
+                    {"mode":"gconv", "chnl": 16, "name":"conv14"},
+                    {"mode":"conv", "chnl": 3, "name":"conv15"}
+                ],
+                "jump_connection": [-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,2,-1,0,-1,-1]
+            },
+            "train": true,
+            "train_epoch" : 20,
+            "ckpoint_step": 50
         },
         "model_ckpoint_dir": "weights/",
         "use_pretrained_weights": true
     },
     "dataset_config":{
-        "img_train_flist":"datasets/train_img.flist",
-        "img_test_flist":"../datasets/celeba_test.flist",
+        "img_train_flist":"datasets/image_train.flist",
+        "img_test_flist":"datasets/image_test.flist",
         "img_validation_flist":"../datasets/celeba_validation.flist",
-        "mask_train_flist":"datasets/train_mask.flist",
+        "mask_train_flist":"datasets/mask_train.flist",
         "mask_validation_flist":"../datasets/mask_validation.flist",
-        "mask_test_flist":"../datasets/mask_test_test.flist",
-        "sigma":2, "input_size":256, "batch_size": 20
+        "mask_test_flist":"datasets/mask_test.flist",
+        "sigma":2, "input_size":256, "batch_size": 8
     }
 }

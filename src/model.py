@@ -8,17 +8,17 @@ class InpaitingModel:
     def __init__(self, model_config):
         self.config = model_config
         self.edge_generator = EdgeGenerator(config=model_config["edge"]["generator"], name="EdgeGenerator")
-        self.eg_opt = tf.keras.optimizers.Adam(learning_rate=0.02, beta_1=0.99, epsilon=1e-1)
+        self.eg_opt = tf.keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.0, beta_2=0.9, epsilon=1e-1)
 
         self.inpainting_generator = InpaitingGenerator(config=model_config["clr"]["generator"], name="InpaitingGenerator")
-        self.ig_opt = tf.keras.optimizers.Adam(learning_rate=0.02, beta_1=0.99, epsilon=1e-1)
+        self.ig_opt = tf.keras.optimizers.Adam(learning_rate=0.0001, beta_1=0.0, beta_2=0.9, epsilon=1e-1)
 
         self.edge_discriminator = EdgeDiscriminator(name="EdgeDiscriminator")
-        self.ed_opt = tf.keras.optimizers.Adam(learning_rate=0.02, beta_1=0.99, epsilon=1e-1)
+        self.ed_opt = tf.keras.optimizers.Adam(learning_rate=0.05, beta_1=0.0, beta_2=0.9, epsilon=1e-1)
         self.ed_built = False
 
         self.inpainting_discriminator = InpaintingDiscriminator(name="InpaintingDiscriminator")
-        self.id_opt = tf.keras.optimizers.Adam(learning_rate=0.02, beta_1=0.99, epsilon=1e-1)
+        self.id_opt = tf.keras.optimizers.Adam(learning_rate=0.05, beta_1=0.0, beta_2=0.9, epsilon=1e-1)
         self.id_built = False
 
         self.perceptual_and_style_loss = PerceptuaAndStylelLoss(name="PL_Loss")
@@ -43,12 +43,14 @@ class InpaitingModel:
                 print("pretrained weights for edge generator loaded")
             elif model == "ed":
                 self.edge_discriminator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "ed", "weights"))
+                self.ed_built = True
                 print("pretrained weights for edge discriminator loaded")
             elif model == "ig":
                 self.inpainting_generator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "ig", "weights"))
                 print("pretrained weights for inpainting generator loaded")
             elif model == 'id':
                 self.inpainting_discriminator.load_weights(os.path.join(self.config['model_ckpoint_dir'], "id", "weights"))
+                self.id_built = True
                 print("pretrained weights for inpainting discriminator loaded")
         except:
             print("weight loading failed for {}".format(model))
@@ -73,7 +75,9 @@ class InpaitingModel:
             gen_loss = self.edge_discriminator.generator_loss(
                 fake_edge, edge,
                 self.config["edge"]["lamb_adv"],
-                self.config["edge"]["lamb_fm"])
+                self.config["edge"]["lamb_fm"],
+                tf.math.reciprocal(1 - tf.reduce_mean(mask, axis=(1,2,3)))
+                )
             disc_loss = self.edge_discriminator.discriminator_loss(fake_edge, edge)
         
         gen_grad = tape.gradient(gen_loss, self.edge_generator.trainable_variables)
@@ -94,7 +98,9 @@ class InpaitingModel:
             psl = self.perceptual_and_style_loss(
                 fake_clr, clr_img,
                 self.config["clr"]["lamb_perc"],
-                self.config["clr"]["lamb_style"])
+                self.config["clr"]["lamb_style"],
+                tf.math.reciprocal(1 - tf.reduce_mean(mask, axis=(1,2,3)))
+                )
             l1_loss = reconstruction_loss(fake_clr, clr_img)
             gen_loss = self.config["clr"]["lamb_l1"] * l1_loss + self.config["clr"]["lamb_adv"] * adv_loss + psl
             disc_loss = self.inpainting_discriminator.discriminator_loss(fake_clr, clr_img)
@@ -105,7 +111,7 @@ class InpaitingModel:
         self.ig_opt.apply_gradients(zip(gen_grad, self.inpainting_generator.trainable_variables))
         self.id_opt.apply_gradients(zip(disc_grad, self.inpainting_discriminator.trainable_variables))
     
-    # @tf.function
+    @tf.function
     def infer_edge(self, gray_img, edge, mask):
         gray_img = tf.cast(gray_img, tf.float32) / 127.5 - 1.0
         edge = tf.cast(edge, tf.float32)
@@ -113,8 +119,11 @@ class InpaitingModel:
         masked_gray = gray_img * mask
         masked_edge = edge * mask
         tmp = self.edge_generator(masked_gray, masked_edge, mask)
-        print("infer_range: ", tf.reduce_min(tmp), tf.reduce_max(tmp))
-        return tf.cast(tmp * 255, tf.uint8)
+        return tf.cast(tf.where(tmp > 0.5, 1.0, tmp) * 255, tf.uint8)
+    
+    def infer_final_edge(self, gray_img, edge, mask):
+        tmp = self.infer_edge(gray_img, edge, mask)
+        return (tf.cast(tmp * (1 - mask) > 200, tf.uint8) + edge * mask) * 255
     
     @tf.function
     def infer_inpainting(self, clr_img, edge, mask):
@@ -124,6 +133,10 @@ class InpaitingModel:
         masked_clr = clr_img * mask
         return tf.cast((self.inpainting_generator(edge, masked_clr, mask) + 1) * 127.5, tf.uint8)
     
+    def infer_final_inpainting(self, clr_img, edge, mask):
+        tmp = self.infer_inpainting(clr_img, edge, mask)
+        return tmp * (1 - mask) + clr_img * mask
+
     @tf.function
     def fused_infer(self, gray_img, clr_img, edge, mask):
         new_edge = self.infer_edge(gray_img, edge, mask)
@@ -155,7 +168,6 @@ class InpaitingModel:
                         edge_img[:,:,0] = curr_edge[0,:,:,0] * curr_mask[0,:,:,0] * 255
                         cv2.imwrite(os.path.join(img_out_dir, "edge{}.png".format(i)).format(i), edge_img)
                         cv2.imwrite(os.path.join(img_out_dir, "mask{}.png".format(i)).format(i), curr_mask[0,:,:,0].numpy() * 255)
-                    return
                 if element_per_epoch is not None and (i % (element_per_epoch//100) == 0):
                     print("{}/{}".format(i, element_per_epoch))
             self.check_pointing_edge_models()
@@ -182,6 +194,7 @@ class InpaitingModel:
                         inpainting_result = self.infer_inpainting(curr_clr, curr_edge, curr_mask)[0]
                         cv2.imwrite(os.path.join(img_out_dir, "inpainted{}.png".format(i)), inpainting_result.numpy()[:,:,(2,1,0)])
                         cv2.imwrite(os.path.join(img_out_dir, "mask{}.png".format(i)).format(i), curr_mask[0,:,:,0].numpy() * 255)
+                    # return
                 if element_per_epoch is not None and (i % (element_per_epoch//100) == 0):
                     print("{}/{}".format(i, element_per_epoch))
             self.check_pointing_inpainting_models()

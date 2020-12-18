@@ -5,9 +5,10 @@ import tensorflow_addons as tfa
 import numpy as np
 
 class GatedConv2d(layers.Layer):
-    def __init__(self, filter_number, ksize=(3,3), strides=(1,1), dilation_rate=(1,1), **kwargs):
+    def __init__(self, filter_number, ksize=(3,3), strides=(1,1), dilation_rate=(1,1), res=False, **kwargs):
         super(GatedConv2d, self).__init__(**kwargs)
         #initializer = tf.keras.initializers.RandomNormal(mean=0., stddev=1.)
+        self.res = res
         self.conv = layers.Conv2D(
             filter_number * 2,
             kernel_size=ksize,
@@ -32,7 +33,9 @@ class GatedConv2d(layers.Layer):
         activate_feature = tf.nn.elu(normalized_feature)
         smooth_gating = tf.nn.sigmoid(gating)
         result = activate_feature * smooth_gating
-        print(tf.reduce_min(result), tf.reduce_max(result))
+        if self.res:
+            result += prev
+        # print(self.name, " ", tf.reduce_min(result), tf.reduce_max(result), tf.reduce_mean(result), tf.math.reduce_std(result))
         return result
 
 
@@ -61,7 +64,7 @@ class GatedDeconv2d(layers.Layer):
         activate_feature = tf.nn.elu(normalized_feature)
         smooth_gating = tf.nn.sigmoid(gating)
         result = activate_feature * smooth_gating
-        print(tf.reduce_min(result), tf.reduce_max(result))
+        # print(self.name, " ", tf.reduce_min(result), tf.reduce_max(result), tf.reduce_mean(result), tf.math.reduce_std(result))
         return result
 
 
@@ -88,7 +91,8 @@ class GatedConvGenerator(keras.Model):
                         ksize=c.get("ksize", (3,3)),
                         strides=c.get("stride", (1,1)),
                         dilation_rate=c.get("d_factor", (1,1)),
-                        name=c.get("name", "conv{}".format(i))
+                        name=c.get("name", "conv{}".format(i)),
+                        res=c.get("res", False)
                     )
                 )
             elif c["mode"] == "gdeconv":
@@ -112,7 +116,7 @@ class GatedConvGenerator(keras.Model):
                         use_bias=True,
                         activation=None,
                         name=c.get("name", "conv{}".format(i)),
-                        kernel_initializer=keras.initializers.RandomNormal(mean=0.0, stddev=1.0)
+                        #kernel_initializer=keras.initializers.RandomNormal(mean=0.0, stddev=3.0)
                     )
                 )
             else:
@@ -126,35 +130,132 @@ class GatedConvGenerator(keras.Model):
                         use_bias=True,
                         activation=None,
                         name=c.get("name", "conv{}".format(i)),
-                        kernel_initializer=keras.initializers.RandomNormal(mean=0.0, stddev=1.0)
+                        #kernel_initializer=keras.initializers.RandomNormal(mean=0.0, stddev=3.0)
                     )
                 )
         
     def call(self, inp):
         return self.convs(inp)
 
+def gen_conv_layers(config):
+    """
+    config is a list of dictionary containing parameter for each layer
+    {
+        "mode": "conv" or "deconv",
+        "chnl": int,
+        "ksize": (int, int),          --optional, default (3,3)
+        "stride": (int, int),         --optional, default (1,1) for conv, (2,2) for deconv
+        "d_factor": (int, int)        --optional, default (1,1)
+        "name": string                --optional, default conv_i
+    }
+    """
+    convs = []
+    for i, c in enumerate(config):
+        if c["mode"] == "gconv":
+            convs.append(
+                GatedConv2d(
+                    c["chnl"],
+                    ksize=c.get("ksize", (3,3)),
+                    strides=c.get("stride", (1,1)),
+                    dilation_rate=c.get("d_factor", (1,1)),
+                    name=c.get("name", "conv{}".format(i)),
+                    res=c.get("res", False)
+                )
+            )
+        elif c["mode"] == "gdeconv":
+            convs.append(
+                GatedDeconv2d(
+                    c["chnl"],
+                    ksize=c.get("ksize", (3,3)),
+                    strides=c.get("stride", (2,2)),
+                    dilation_rate=c.get("d_factor", (1,1)),
+                    name=c.get("name", "conv{}".format(i))
+                )
+            )
+        elif c["mode"] == "conv":
+            convs.append(
+                layers.Conv2D(
+                    c["chnl"],
+                    kernel_size=c.get("ksize", (3,3)),
+                    strides=c.get("stride", (1,1)),
+                    padding="same",
+                    dilation_rate=c.get("d_factor", (1,1)),
+                    use_bias=True,
+                    activation=None,
+                    name=c.get("name", "conv{}".format(i)),
+                    #kernel_initializer=keras.initializers.RandomNormal(mean=0.0, stddev=3.0)
+                )
+            )
+        else:
+            convs.append(
+                layers.Conv2DTranspose(
+                    c["chnl"],
+                    kernel_size=c.get("ksize", (3,3)),
+                    strides=c.get("stride", (2,2)),
+                    padding="same",
+                    dilation_rate=c.get("d_factor", (1,1)),
+                    use_bias=True,
+                    activation=None,
+                    name=c.get("name", "conv{}".format(i)),
+                    #kernel_initializer=keras.initializers.RandomNormal(mean=0.0, stddev=3.0)
+                )
+            )
+    return convs
+
+
+# class EdgeGenerator(keras.Model):
+#     def __init__(self, config, **kwargs):
+#         super(EdgeGenerator, self).__init__(**kwargs)        
+#         self.model = GatedConvGenerator(config, name="convolutions")
+    
+#     def call(self, masked_gray, masked_edge, mask):
+#         inp = tf.concat((masked_gray, masked_edge, mask), axis=3)
+#         logit = self.model(inp)
+#         # print("eg_before: ", tf.reduce_min(logit), tf.reduce_max(logit), tf.reduce_mean(logit), tf.math.reduce_std(logit))
+#         raw_pred = tf.sigmoid(logit)
+#         # print("eg_range: ", tf.reduce_min(raw_pred), tf.reduce_max(raw_pred), tf.reduce_mean(logit), tf.math.reduce_std(logit))
+#         # return raw_pred * (1-mask) + masked_edge
+#         # print(tf.reduce_min(raw_pred), tf.reduce_max(raw_pred))
+#         return raw_pred
 
 class EdgeGenerator(keras.Model):
     def __init__(self, config, **kwargs):
-        super(EdgeGenerator, self).__init__(**kwargs)        
-        self.model = GatedConvGenerator(config, name="convolutions")
+        super(EdgeGenerator, self).__init__(**kwargs)
+        # self.model = GatedConvGenerator(config["layers"], name="convolutions")
+        self.convs = gen_conv_layers(config["layers"])
+        self.jumps = config["jump_connection"]
     
     def call(self, masked_gray, masked_edge, mask):
-        inp = tf.concat((masked_gray, masked_edge, mask), axis=3)
-        raw_pred = tf.sigmoid(self.model(inp))
-        print("eg_range: ", tf.reduce_min(raw_pred), tf.reduce_max(raw_pred))
-        #return raw_pred * (1-mask) + masked_edge
-        #print(tf.reduce_min(raw_pred), tf.reduce_max(raw_pred))
+        curr = tf.concat((masked_gray, masked_edge, mask), axis=3)
+        curr_result = []
+        for c, j in zip(self.convs, self.jumps):
+            curr = c(curr)
+            curr_result.append(curr)
+            if j != -1:
+                curr = tf.concat((curr, curr_result[j]), axis=3)
+        # logit = self.model(inp)
+        # print("eg_before: ", tf.reduce_min(logit), tf.reduce_max(logit), tf.reduce_mean(logit), tf.math.reduce_std(logit))
+        raw_pred = tf.sigmoid(curr)
+        # print("eg_range: ", tf.reduce_min(raw_pred), tf.reduce_max(raw_pred), tf.reduce_mean(logit), tf.math.reduce_std(logit))
+        # return raw_pred * (1-mask) + masked_edge
+        # print(tf.reduce_min(raw_pred), tf.reduce_max(raw_pred))
         return raw_pred
 
 
 class InpaitingGenerator(keras.Model):
     def __init__(self, config, **kwargs):
         super(InpaitingGenerator, self).__init__(**kwargs)
-        self.model = GatedConvGenerator(config, name="convolutions")
+        self.convs = gen_conv_layers(config["layers"])
+        self.jumps = config["jump_connection"]
     
     def call(self, edge, masked_clr, mask):
-        inp = tf.concat((edge, masked_clr, mask), axis=3)
-        raw_pred = tf.tanh(self.model(inp))
+        curr = tf.concat((edge, masked_clr, mask), axis=3)
+        curr_result = []
+        for c, j in zip(self.convs, self.jumps):
+            curr = c(curr)
+            curr_result.append(curr)
+            if j != -1:
+                curr = tf.concat((curr, curr_result[j]), axis=3)
+        raw_pred = tf.tanh(curr)
         #return raw_pred * (1-mask) + masked_clr
         return raw_pred

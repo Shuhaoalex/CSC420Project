@@ -34,7 +34,8 @@ class Dataset(object):
     def get_size(self):
         return self.size
 
-    # TODO: Add reference
+    # function load_flist is modified from below github link
+    # Reference link: https://github.com/knazeri/edge-connect
     def load_flist(self, flist):
         if isinstance(flist, list):
             return flist
@@ -60,8 +61,8 @@ class Dataset(object):
         color_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         r,c = color_image.shape[0], color_image.shape[1]
 
-        # 1. ground truth part
-        # 1.1 ground truth color image
+        # ground truth part
+        # 1. ground truth color image
         # for training and validation data, first check to crop the original color image
         if r != c:
             color_image = self.crop_square_image(color_image)
@@ -69,7 +70,7 @@ class Dataset(object):
         color_image = cv2.resize(color_image, (size,size))
         gray_image = cv2.cvtColor(color_image, cv2.COLOR_RGB2GRAY)
 
-        # 1.2 input mask is 0(black) for missing foreground region and 255(white) for background
+        # 2. input mask is 0(black) for missing foreground region and 255(white) for background
         # random select a mask for training
         mask_idx = random.randint(0, self.mask_list.size - 1)
         mask = cv2.imread(self.mask_list[mask_idx], cv2.IMREAD_GRAYSCALE)
@@ -81,7 +82,7 @@ class Dataset(object):
         # final output for mask: 0(black) for missing foreground region and 1(white) for background
         mask = bool_mask.astype(np.uint8)
         
-        # 1.3 ground truth edge without any masked regions
+        # 3. ground truth edge without any masked regions
         # canny
         edge_map = (canny(gray_image, guassian_blur_sigma=1.0, sobel_size=3, lowThresholdRatio=0.25, highThresholdRatio=0.3) > 0).astype(np.uint8)# background is 0, foreground is 1
 
@@ -133,20 +134,3 @@ def construct_dataset(config, mode=None):
     if img_list and mask_list:
         dataset = Dataset(config, img_list, mask_list)
         return dataset
-
-if __name__ == "__main__":
-    # TODO: should initialize all variables to a config file
-    config = {"img_train_flist":"../datasets/final_train.flist", \
-        "img_test_flist":"../datasets/celeba_test.flist", \
-            "img_validation_flist":"../datasets/celeba_validation.flist", \
-                "mask_train_flist":"../datasets/final_mask_train.flist", \
-                    "mask_validation_flist":"../datasets/mask_validation.flist", \
-                        "mask_test_flist":"../datasets/mask_test.flist", \
-                            "sigma":2, "input_size":256}
-    
-    # get neural network datasets
-    # inputs: config file, dataset mode(train, test, validation)
-    dataset = construct_dataset(config, mode="train")
-    edge_dataset = dataset.get_edge_dataset()
-    color_dataset = dataset.get_color_dataset()
-    size = dataset.get_size()
