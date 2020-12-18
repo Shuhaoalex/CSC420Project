@@ -23,25 +23,19 @@ folder structure could be like:
 
 
 1. Images
-1.1 Use Places365-Standard(small 265*265), and celeba(cropped and align version),
-    Reference link: http://places2.csail.mit.edu ,http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html
-    Download link: https://drive.google.com/file/d/1mdGFZqLgvkn67qnyE2YXQX7jas6q4E_M/view?usp=sharing
+    Use celebA(cropped and align version)
+    Reference link: http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html
     
-    Use subset of images of places and celeba as the training set.
+    Use subset of images of celeba as the training set.
 
 2. Irregular Masks
     Use qd-imd,
     Reference link: https://github.com/karfly/qd-imd
-    Download link: https://www.dropbox.com/s/ui4zgw7dhe9v1ju/qd_imd.tar.gz?dl=0 
-
-    Download from the above download link and unzip it. After unzipping, it will be two folders(train and test).
-    Move images under /train and /test to /qd_imd/train/ and /qd_imd/test/ separately
-    Move [40000_train.png ... 49999_train.png] from /qd_imd/train/ to /qd_imd/validation/. Other images under /qd_imd/train/ and /qd_imd/test/ stay remained.
 
 
-2. Generate flist
-Choose one image dataset and use irregular mask dataset to initialize dataset.
-You'll need a flist file which lists all file paths. Run script under /script/ to generate that flist file.
+3. Generate flist
+You'll need a flist file which lists all file paths to generate dataset for the model. 
+Run script under /scripts/ to generate that flist file. Reference: this script is modified from this link: https://github.com/knazeri/edge-connect/blob/master/scripts/flist.py
 Example use: 
-    1. training: python ./src/scripts/flist.py --path ./datasets/train/images/ --output ./datasets/image_train.flist
+    1. training: python ./src/scripts/flist.py --path ./datasets/train/image/ --output ./datasets/image_train.flist
     2. testing: python ./src/scripts/flist.py --path ./datasets/test/images/ --output ./datasets/image_test.flist --test_size 10
