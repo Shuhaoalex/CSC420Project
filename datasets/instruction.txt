@@ -2,35 +2,40 @@ Under ./datasets/.. folder
 folder structure could be like:
 --datasets
 ------train
----------image
+---------images
 ----------------.....
 ---------mask
 ----------------.....
 ------test
-----------image
----------------Places
-------------------.....
----------------Celeba
+----------images
 ------------------.....
 ----------mask
 ----------------.....
 -------------.....
 ------validation
----------image
+---------images
 ----------------.....
 ---------mask
 ----------------.....
 
 
-1. Images
-    Use celebA(cropped and align version)
-    Reference link: http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html
-    
-    Use subset of images of celeba as the training set.
+1. Training Dataset 
 
-2. Irregular Masks
+    1.1 Images
+    Use celebA(cropped and align version)
+    Reference link: https://drive.google.com/drive/folders/0B7EVK8r0v71pTUZsaXdaSnZBZzg
+
+    1.2 Irregular Masks
     Use qd-imd,
-    Reference link: https://github.com/karfly/qd-imd
+    Reference link: https://www.dropbox.com/s/ui4zgw7dhe9v1ju/qd_imd.tar.gz?dl=0&file_subpath=%2Fqd_imd
+
+   In our directory /datasets/train, we only have a few training examples for images and    
+   irregualr masks. When we are training the parameter, we use subset of images and 
+   irregular masks from the above link, which contains more images and irregular masks.
+
+2. Testing Dataset
+
+   Use images and irregular masks in our directory /datasets/test/
 
 
 3. Generate flist
@@ -38,4 +43,5 @@ You'll need a flist file which lists all file paths to generate dataset for the 
 Run script under /scripts/ to generate that flist file. Reference: this script is modified from this link: https://github.com/knazeri/edge-connect/blob/master/scripts/flist.py
 Example use: 
     1. training: python ./src/scripts/flist.py --path ./datasets/train/image/ --output ./datasets/image_train.flist
-    2. testing: python ./src/scripts/flist.py --path ./datasets/test/images/ --output ./datasets/image_test.flist --test_size 10
+    2. testing: python ./src/scripts/flist.py --path ./datasets/test/images/ --output ./datasets/image_test.flist
+ 
